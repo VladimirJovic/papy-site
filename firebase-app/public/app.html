@@ -1,0 +1,1644 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Raspored Sedenja — Venčanje</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Infant:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --navy:#1a1a2e; --navy-mid:#252540; --navy-light:#2e2e50;
+  --gold:#c9a84c; --gold-light:#e8c96a; --gold-dim:#f0d98c; --gold-muted:#9a7a32;
+  --cream:#f7f3ec; --cream-dark:#ede7da; --white:#ffffff;
+  --border:#e2d9c8; --border-mid:#d0c4ae;
+  --text:#1e1e2e; --text-mid:#4a4a6a; --muted:#8888a8;
+  --success:#3d9970; --danger:#c0392b; --warning:#e67e22;
+  --shadow-sm:0 1px 4px rgba(0,0,0,.08);
+  --shadow-md:0 4px 16px rgba(0,0,0,.12);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.18);
+  --radius:10px; --radius-lg:16px;
+  --font-display:'Playfair Display','Georgia',serif;
+  --font-text:'Cormorant Infant','Georgia',serif;
+  --font-ui:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+html,body { height:100%; }
+body {
+  font-family:var(--font-ui); background:var(--cream); color:var(--text);
+  display:flex; flex-direction:column; overflow:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── LOADING SCREEN ──────────────────────────────────── */
+#loadScreen {
+  position:fixed; inset:0; background:var(--navy);
+  display:flex; align-items:center; justify-content:center;
+  flex-direction:column; gap:18px; z-index:9000;
+  transition:opacity .35s;
+}
+#loadScreen.out { opacity:0; pointer-events:none; }
+.load-ring {
+  width:44px; height:44px;
+  border:3px solid rgba(201,168,76,.2);
+  border-top-color:var(--gold);
+  border-radius:50%;
+  animation:spin .8s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+.load-text {
+  font-family:var(--font-display); font-size:15px;
+  color:rgba(201,168,76,.6); letter-spacing:.5px;
+}
+
+/* ── NO ACCESS SCREEN ───────────────────────────────── */
+#noAccessScreen {
+  display:none;
+  position:fixed; inset:0; background:var(--navy);
+  align-items:center; justify-content:center;
+  flex-direction:column; gap:16px; z-index:8000;
+}
+#noAccessScreen h2 {
+  font-family:var(--font-display); color:var(--gold-dim); font-size:20px;
+}
+#noAccessScreen p { color:rgba(255,255,255,.4); font-size:14px; text-align:center; }
+#noAccessScreen .btn-logout {
+  margin-top:8px; padding:10px 24px;
+  background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15);
+  border-radius:8px; color:rgba(255,255,255,.6); font-size:13px; cursor:pointer;
+}
+
+/* ── HEADER ──────────────────────────────────────────── */
+header {
+  background:var(--navy); padding:0 16px;
+  display:grid; grid-template-columns:auto 1fr auto;
+  align-items:center; gap:12px; height:56px; flex-shrink:0;
+  border-bottom:1px solid rgba(201,168,76,.25);
+}
+.hdr-brand { display:flex; align-items:center; gap:9px; }
+.hdr-brand h1 {
+  font-family:var(--font-display); font-size:17px; font-weight:600;
+  color:var(--gold-dim); letter-spacing:.3px; white-space:nowrap;
+}
+.hdr-center { display:flex; align-items:center; gap:10px; min-width:0; }
+.view-toggle {
+  display:flex; background:rgba(255,255,255,.07);
+  border-radius:8px; padding:3px; gap:2px;
+}
+.view-btn {
+  padding:5px 14px; border:none; border-radius:6px; cursor:pointer;
+  font-size:12px; font-family:var(--font-ui); font-weight:500;
+  color:rgba(255,255,255,.5); background:transparent; transition:all .2s;
+  display:flex; align-items:center; gap:6px; white-space:nowrap;
+}
+.view-btn.active { background:var(--gold); color:var(--navy); }
+.hdr-stats {
+  font-size:11px; color:rgba(255,255,255,.35);
+  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+}
+.hdr-actions { display:flex; gap:6px; align-items:center; }
+
+/* ── BUTTONS ─────────────────────────────────────────── */
+.btn {
+  display:inline-flex; align-items:center; gap:6px;
+  padding:7px 13px; border:none; border-radius:7px; cursor:pointer;
+  font-size:12px; font-family:var(--font-ui); font-weight:500;
+  transition:all .18s; white-space:nowrap;
+  -webkit-tap-highlight-color:transparent; min-height:34px;
+}
+.btn:active { transform:scale(.97); }
+.btn-gold  { background:var(--gold); color:var(--navy); }
+.btn-gold:hover { background:var(--gold-light); }
+.btn-ghost { background:rgba(255,255,255,.08); color:rgba(255,255,255,.65); border:1px solid rgba(255,255,255,.12); }
+.btn-ghost:hover { background:rgba(255,255,255,.14); }
+.btn-green { background:var(--success); color:white; }
+.btn-green:hover { background:#2ecc71; }
+.btn-danger { background:var(--danger); color:white; }
+.btn-lock   { background:rgba(255,255,255,.1); color:rgba(255,255,255,.7); border:1px solid rgba(255,255,255,.18); }
+.btn-lock:hover { background:rgba(255,255,255,.18); }
+.btn-unlock { background:var(--gold); color:var(--navy); }
+.btn-unlock:hover { background:var(--gold-light); }
+
+/* ── LAYOUT ─────────────────────────────────────────── */
+.app { display:flex; flex:1; overflow:hidden; position:relative; }
+#viewPlan { display:flex; flex:1; overflow:hidden; }
+
+/* ── SIDEBAR ─────────────────────────────────────────── */
+.sidebar {
+  width:268px; background:var(--white);
+  border-right:1px solid var(--border);
+  display:flex; flex-direction:column; flex-shrink:0; overflow:hidden;
+}
+.sb-section { padding:14px; border-bottom:1px solid var(--border); }
+.sb-section h3 {
+  font-size:10px; font-family:var(--font-ui); font-weight:600;
+  text-transform:uppercase; letter-spacing:1.2px; color:var(--muted); margin-bottom:11px;
+}
+.sb-scroll { flex:1; overflow-y:auto; padding:8px; }
+
+.shape-row { display:flex; gap:6px; }
+.shape-btn {
+  flex:1; padding:8px 4px 7px; border:1.5px solid var(--border); border-radius:8px;
+  background:white; cursor:pointer; text-align:center;
+  font-size:10px; font-family:var(--font-ui); font-weight:500;
+  color:var(--muted); transition:all .18s;
+}
+.shape-btn svg { display:block; margin:0 auto 4px; }
+.shape-btn:hover { border-color:var(--gold); color:var(--gold); }
+.shape-btn.active { border-color:var(--gold); color:var(--gold); background:#fffbef; }
+
+.field-row { display:flex; align-items:center; gap:8px; margin-top:10px; }
+.field-row label { font-size:12px; color:var(--text-mid); flex:1; }
+.field-row input[type=number] {
+  width:60px; padding:6px 8px; border:1.5px solid var(--border); border-radius:7px;
+  font-size:14px; font-family:var(--font-ui); text-align:center; color:var(--text); background:white;
+}
+.field-row input[type=number]:focus { outline:none; border-color:var(--gold); }
+
+.guest-item {
+  display:flex; align-items:center; gap:7px; padding:8px 8px 8px 9px;
+  border-radius:8px; font-size:13px; cursor:grab; margin-bottom:3px;
+  border:1.5px solid transparent; transition:background .14s, border-color .14s;
+  touch-action:none; -webkit-tap-highlight-color:transparent;
+}
+.guest-item:hover { background:#f5f3ff; }
+.guest-item.assigned { background:#f0faf5; }
+.guest-item.sel-touch { border-color:var(--gold); background:#fffbef; }
+.guest-item.dragging-now { opacity:.3; }
+.guest-avatar {
+  width:28px; height:28px; border-radius:50%; background:var(--navy);
+  color:var(--gold-dim); font-size:11px; font-weight:600; font-family:var(--font-ui);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0; letter-spacing:0;
+}
+.guest-avatar.assigned { background:var(--success); color:white; }
+.guest-info { flex:1; min-width:0; }
+.guest-name { font-size:13px; color:var(--text); line-height:1.2; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.guest-meta { font-size:10px; color:var(--muted); margin-top:1px; display:flex; gap:5px; flex-wrap:wrap; }
+.badge { display:inline-flex; align-items:center; gap:3px; padding:1px 6px; border-radius:20px; font-size:10px; font-family:var(--font-ui); font-weight:500; }
+.badge-plus { background:#e8f5e9; color:var(--success); }
+.badge-kid  { background:#fff3e0; color:#e65100; }
+.badge-tbl  { background:var(--cream-dark); color:var(--navy); }
+
+.guest-edit-btn {
+  width:26px; height:26px; border:none; border-radius:6px; background:transparent;
+  cursor:pointer; display:flex; align-items:center; justify-content:center;
+  color:var(--muted); transition:background .14s, color .14s; flex-shrink:0;
+}
+.guest-edit-btn:hover { background:var(--cream); color:var(--navy); }
+.guest-del-btn {
+  width:24px; height:24px; border:none; border-radius:6px; background:transparent;
+  cursor:pointer; color:#ddd; display:flex; align-items:center; justify-content:center;
+  transition:color .14s; flex-shrink:0;
+}
+.guest-del-btn:hover { color:var(--danger); }
+
+.guest-input-row { display:flex; gap:6px; }
+.guest-input-row input {
+  flex:1; padding:8px 11px; border:1.5px solid var(--border); border-radius:8px;
+  font-size:13px; font-family:var(--font-ui); color:var(--text); background:white;
+  -webkit-user-select:text; user-select:text;
+}
+.guest-input-row input:focus { outline:none; border-color:var(--gold); }
+
+/* ── ROOM ────────────────────────────────────────────── */
+.room-wrap {
+  flex:1; position:relative; overflow:hidden;
+  background:#ece6d9;
+  background-image:linear-gradient(rgba(0,0,0,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(0,0,0,.04) 1px,transparent 1px);
+  background-size:40px 40px; touch-action:none;
+  cursor:grab;
+}
+.room-wrap.panning { cursor:grabbing; }
+.room-canvas { position:absolute; top:0; left:0; width:100%; height:100%; }
+
+.table-widget {
+  position:absolute; display:flex; align-items:center; justify-content:center;
+  cursor:grab; touch-action:none; -webkit-tap-highlight-color:transparent;
+}
+.table-widget.selected .table-face { box-shadow:0 0 0 3px var(--gold),var(--shadow-lg); }
+.table-face {
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  background:var(--navy); padding:10px 8px; box-shadow:var(--shadow-md);
+  transition:box-shadow .18s; position:relative; text-align:center;
+}
+.table-face.round { border-radius:50%; }
+.table-face.rect  { border-radius:11px; }
+.table-face.oval  { border-radius:50%; }
+.table-face.drop-hl { box-shadow:0 0 0 3px var(--success),var(--shadow-md); }
+.tbl-num  { font-size:10px; color:var(--gold-muted); line-height:1; letter-spacing:.5px; margin-bottom:1px; }
+.tbl-name { font-size:12px; font-weight:600; color:var(--gold-dim); white-space:nowrap; max-width:90px; overflow:hidden; text-overflow:ellipsis; }
+.tbl-cap  { font-size:10px; color:rgba(255,255,255,.4); margin-top:2px; }
+.tbl-fill { font-size:10px; margin-top:3px; }
+.tbl-fill.f-empty { color:rgba(255,255,255,.3); }
+.tbl-fill.f-ok    { color:var(--success); }
+.tbl-fill.f-full  { color:#e74c3c; }
+.tbl-del {
+  position:absolute; top:-9px; right:-9px; width:22px; height:22px;
+  background:var(--danger); color:white; border-radius:50%;
+  font-size:14px; line-height:22px; text-align:center; cursor:pointer;
+  display:none; z-index:10; box-shadow:var(--shadow-sm);
+}
+.table-widget.selected .tbl-del { display:block; }
+
+/* ── DETAIL PANEL ────────────────────────────────────── */
+.detail-panel {
+  position:absolute; right:14px; top:14px; width:258px; background:white;
+  border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); padding:18px;
+  z-index:100; display:none; border:1px solid var(--border);
+}
+.detail-panel.open { display:block; }
+.detail-panel h3 {
+  font-size:11px; font-family:var(--font-ui); text-transform:uppercase;
+  letter-spacing:1px; color:var(--muted); margin-bottom:14px;
+}
+.dp-field { margin-bottom:12px; }
+.dp-field label { display:block; font-size:11px; color:var(--text-mid); margin-bottom:5px; }
+.dp-field input {
+  width:100%; padding:7px 10px; border:1.5px solid var(--border); border-radius:8px;
+  font-size:13px; font-family:var(--font-ui); color:var(--text); background:white;
+}
+.dp-field input:focus { outline:none; border-color:var(--gold); }
+.dp-slots { margin-top:10px; }
+.dp-slot {
+  display:flex; align-items:center; gap:7px; padding:6px 8px; border-radius:7px;
+  font-size:12px; margin-bottom:3px; background:#f8f7f4; border:1px solid var(--border);
+}
+.dp-slot-name { flex:1; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dp-slot-sub  { font-size:10px; color:var(--muted); }
+.dp-slot-rm   { width:20px; height:20px; border:none; background:none; cursor:pointer; color:#ccc; font-size:16px; line-height:1; transition:color .14s; flex-shrink:0; }
+.dp-slot-rm:hover { color:var(--danger); }
+.dp-empty { font-size:12px; color:var(--muted); padding:10px 0; text-align:center; font-style:italic; }
+.dp-actions { display:flex; gap:6px; margin-top:14px; }
+.dp-actions .btn { flex:1; justify-content:center; }
+
+/* ── VIEW: GUEST LIST ────────────────────────────────── */
+#viewGuests {
+  display:none; flex:1; flex-direction:column; overflow:hidden;
+  background:var(--cream);
+}
+#viewGuests.active { display:flex; }
+.gl-toolbar {
+  padding:12px 16px; display:flex; gap:10px; align-items:center;
+  background:white; border-bottom:1px solid var(--border); flex-shrink:0;
+}
+.gl-search {
+  flex:1; padding:9px 14px; border:1.5px solid var(--border); border-radius:9px;
+  font-size:14px; font-family:var(--font-ui); color:var(--text); background:white;
+  -webkit-user-select:text; user-select:text;
+}
+.gl-search:focus { outline:none; border-color:var(--gold); }
+.gl-sort-toggle { display:flex; background:var(--cream); border-radius:8px; padding:3px; gap:2px; }
+.gl-sort-btn {
+  padding:5px 12px; border:none; border-radius:6px; cursor:pointer;
+  font-size:11px; font-family:var(--font-ui); font-weight:500;
+  color:var(--muted); background:transparent; transition:all .18s;
+}
+.gl-sort-btn.active { background:var(--navy); color:white; }
+.gl-summary {
+  font-size:12px; color:var(--muted); text-align:center;
+  padding:8px 16px; background:var(--cream-dark); border-bottom:1px solid var(--border-mid);
+  font-family:var(--font-ui); flex-shrink:0;
+}
+.gl-body { flex:1; overflow-y:auto; padding:12px 16px; }
+
+.gl-group-hdr {
+  display:flex; align-items:center; gap:10px;
+  padding:14px 0 6px; margin-top:6px;
+}
+.gl-group-num {
+  width:32px; height:32px; border-radius:50%; background:var(--navy);
+  color:var(--gold-dim); font-size:12px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+.gl-group-name { font-weight:600; font-size:14px; color:var(--text); }
+.gl-group-meta { font-size:11px; color:var(--muted); }
+.gl-group-line { flex:1; height:1px; background:var(--border); }
+.gl-unassigned-hdr {
+  font-size:11px; font-weight:600; letter-spacing:.8px; text-transform:uppercase;
+  color:var(--muted); padding:14px 0 6px; margin-top:6px;
+}
+.gl-card {
+  display:flex; align-items:center; gap:12px; padding:11px 14px;
+  background:white; border:1.5px solid var(--border); border-radius:var(--radius);
+  margin-bottom:7px; transition:border-color .18s, background .18s;
+}
+.gl-card:hover { border-color:var(--gold); cursor:pointer; }
+.gl-card-avatar {
+  width:38px; height:38px; border-radius:50%; background:var(--navy);
+  color:var(--gold-dim); font-size:13px; font-weight:700; font-family:var(--font-ui);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0; letter-spacing:0;
+}
+.gl-card-avatar.ok { background:var(--success); color:white; }
+.gl-card-avatar.unassigned { background:var(--border-mid); color:var(--muted); }
+.gl-card-info { flex:1; min-width:0; }
+.gl-card-name { font-size:14px; font-weight:600; color:var(--text); }
+.gl-card-sub { font-size:12px; color:var(--muted); margin-top:2px; display:flex; gap:6px; flex-wrap:wrap; }
+.gl-card-tbl { text-align:right; flex-shrink:0; }
+.gl-card-tbl-num { font-size:18px; font-weight:700; color:var(--gold-muted); line-height:1; font-family:var(--font-display); }
+.gl-card-tbl-name { font-size:10px; color:var(--muted); max-width:80px; text-align:right; }
+
+/* ── LOCK MODE ───────────────────────────────────────── */
+.gl-check-btn {
+  width:44px; height:44px; border-radius:50%; border:2.5px solid var(--border-mid);
+  background:white; cursor:pointer; display:flex; align-items:center; justify-content:center;
+  flex-shrink:0; transition:all .18s; -webkit-tap-highlight-color:transparent;
+}
+.gl-check-btn:hover { border-color:var(--success); }
+.gl-check-btn.checked { background:var(--success); border-color:var(--success); }
+.gl-check-btn svg { display:none; }
+.gl-check-btn.checked svg { display:block; }
+.gl-card.arrived { background:#f0faf5; border-color:#b2dfcc; }
+.gl-card.arrived .gl-card-name { color:var(--text-mid); }
+.gl-card.arrived .gl-card-avatar.ok { background:var(--success); }
+
+body.hostess-mode .hdr-actions .btn-lock,
+body.hostess-mode .hdr-actions .btn-ghost,
+body.hostess-mode .hdr-actions .btn-green,
+body.hostess-mode header .view-toggle { display:none; }
+body.hostess-mode .gl-toolbar .gl-sort-toggle { display:none; }
+body.hostess-mode .gl-card { cursor:pointer; }
+
+body.admin-locked header .view-toggle,
+body.admin-locked .hdr-actions .btn-green,
+body.admin-locked .hdr-actions .btn-ghost:not(.btn-admin-panel) { display:none; }
+body.admin-locked .gl-toolbar .gl-sort-toggle { display:none; }
+body.admin-locked .gl-card { cursor:pointer; }
+
+/* ── MODALS ──────────────────────────────────────────── */
+.modal-overlay {
+  position:fixed; inset:0; background:rgba(0,0,0,.55); backdrop-filter:blur(3px);
+  display:none; align-items:center; justify-content:center; z-index:1000; padding:16px;
+}
+.modal-overlay.open { display:flex; }
+.modal {
+  background:white; border-radius:var(--radius-lg); box-shadow:var(--shadow-lg);
+  width:100%; max-width:400px; max-height:90vh; overflow-y:auto;
+  animation:slideUp .22s ease-out;
+}
+@keyframes slideUp { from { transform:translateY(16px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+.modal-hdr {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:18px 20px 14px; border-bottom:1px solid var(--border);
+}
+.modal-hdr h2 {
+  font-family:var(--font-display); font-size:18px; font-weight:600; color:var(--text);
+}
+.modal-close {
+  width:30px; height:30px; border:none; background:var(--cream); border-radius:8px;
+  cursor:pointer; font-size:18px; color:var(--muted); display:flex; align-items:center; justify-content:center;
+}
+.modal-close:hover { background:var(--border); color:var(--text); }
+.modal-body { padding:20px; }
+.modal-body .field { margin-bottom:14px; }
+.modal-body .field label { display:block; font-size:11px; font-weight:600; letter-spacing:.6px; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+.modal-body .field input[type=text],
+.modal-body .field input[type=email],
+.modal-body .field input[type=password] {
+  width:100%; padding:9px 12px; border:1.5px solid var(--border); border-radius:9px;
+  font-size:14px; font-family:var(--font-ui); color:var(--text);
+}
+.modal-body .field input:focus { outline:none; border-color:var(--gold); }
+.modal-row { display:flex; gap:10px; margin-top:18px; }
+.modal-row .btn { flex:1; justify-content:center; padding:10px; font-size:13px; }
+
+/* plusOne toggle */
+.toggle-row {
+  display:flex; align-items:center; gap:10px;
+  padding:10px 14px; background:var(--cream); border-radius:9px; margin-bottom:14px;
+}
+.toggle-row label { flex:1; font-size:14px; color:var(--text); }
+.toggle-sw { position:relative; width:42px; height:24px; flex-shrink:0; }
+.toggle-sw input { opacity:0; width:0; height:0; }
+.toggle-track {
+  position:absolute; inset:0; background:#ddd; border-radius:12px;
+  cursor:pointer; transition:background .18s;
+}
+.toggle-sw input:checked + .toggle-track { background:var(--success); }
+.toggle-thumb {
+  position:absolute; top:3px; left:3px; width:18px; height:18px;
+  background:white; border-radius:50%; transition:transform .18s;
+  box-shadow:var(--shadow-sm); pointer-events:none;
+}
+.toggle-sw input:checked ~ .toggle-thumb { transform:translateX(18px); }
+.plusone-name { width:100%; padding:8px 11px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; font-family:var(--font-ui); color:var(--text); display:none; margin-top:8px; }
+.plusone-name.show { display:block; }
+.plusone-name:focus { outline:none; border-color:var(--gold); }
+.child-row { display:flex; align-items:center; gap:10px; padding:10px 14px; background:var(--cream); border-radius:9px; margin-bottom:14px; }
+.child-row label { flex:1; font-size:14px; color:var(--text); }
+.child-stepper { display:flex; align-items:center; gap:8px; }
+.child-stepper button { width:28px; height:28px; border-radius:50%; border:1.5px solid var(--border); background:white; cursor:pointer; font-size:16px; color:var(--text-mid); display:flex; align-items:center; justify-content:center; }
+.child-stepper button:hover { border-color:var(--gold); color:var(--gold); }
+.child-stepper span { font-size:16px; font-weight:600; min-width:20px; text-align:center; }
+
+/* ── ADMIN PANEL ─────────────────────────────────────── */
+.admin-panel-modal { max-width:480px; }
+.admin-who {
+  display:flex; align-items:center; justify-content:space-between;
+  background:var(--cream); border-radius:9px; padding:11px 14px; margin-bottom:20px;
+}
+.admin-who-email { font-size:13px; color:var(--text-mid); }
+.admin-who-email strong { color:var(--text); }
+.admin-section-title {
+  font-size:10px; font-weight:600; text-transform:uppercase; letter-spacing:1px;
+  color:var(--muted); margin-bottom:10px; padding-bottom:6px; border-bottom:1px solid var(--border);
+}
+.hostess-item {
+  display:flex; align-items:center; gap:10px; padding:10px 12px;
+  background:var(--cream); border-radius:9px; margin-bottom:6px; border:1.5px solid var(--border);
+}
+.hostess-item-info { flex:1; }
+.hostess-item-name { font-size:14px; font-weight:600; color:var(--text); }
+.hostess-item-email { font-size:12px; color:var(--muted); }
+.hostess-item-del {
+  width:32px; height:32px; border:none; border-radius:7px; background:transparent;
+  cursor:pointer; color:#ccc; font-size:18px; display:flex; align-items:center; justify-content:center;
+  transition:color .14s, background .14s;
+}
+.hostess-item-del:hover { color:var(--danger); background:#fff0ef; }
+.admin-create-form { margin-top:20px; }
+.admin-form-error { font-size:12px; color:var(--danger); margin-bottom:10px; min-height:16px; }
+.admin-migrate {
+  margin-top:20px; padding-top:16px; border-top:1px solid var(--border);
+}
+
+/* ── DRAG GHOST ──────────────────────────────────────── */
+#drag-ghost {
+  position:fixed; display:none; align-items:center; gap:8px;
+  background:var(--navy); color:var(--gold-dim); padding:6px 12px;
+  border-radius:9px; font-size:12px; font-family:var(--font-ui); font-weight:500;
+  pointer-events:none; z-index:2000; box-shadow:var(--shadow-md); white-space:nowrap;
+  border:1px solid rgba(201,168,76,.3);
+}
+
+/* ── TOAST ───────────────────────────────────────────── */
+#toast {
+  position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+  background:var(--navy); color:var(--gold-dim); padding:9px 20px;
+  border-radius:9px; font-size:13px; font-family:var(--font-ui);
+  opacity:0; pointer-events:none; transition:opacity .2s; z-index:9999;
+  box-shadow:var(--shadow-md); white-space:nowrap; border:1px solid rgba(201,168,76,.3);
+}
+.toast.show { opacity:1; }
+
+/* ── LEGEND ──────────────────────────────────────────── */
+.room-legend {
+  position:absolute; bottom:12px; left:12px;
+  font-size:10px; color:var(--muted); background:rgba(255,255,255,.85);
+  padding:6px 10px; border-radius:8px; font-family:var(--font-ui);
+  pointer-events:none; backdrop-filter:blur(4px);
+}
+
+/* ── SCROLLBAR ───────────────────────────────────────── */
+::-webkit-scrollbar { width:5px; height:5px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border-mid); border-radius:3px; }
+
+@media print {
+  body { overflow:visible; height:auto; background:white; }
+  header,.sidebar,.detail-panel,.room-legend,#drag-ghost,.modal-overlay,#viewGuests,#loadScreen { display:none !important; }
+  #viewPlan { height:auto; overflow:visible; }
+  .room-wrap { overflow:visible; height:90vh; }
+  .tbl-del { display:none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ LOADING ════════════════════════════════════════════ -->
+<div id="loadScreen">
+  <div class="load-ring"></div>
+  <div class="load-text">Učitavanje…</div>
+</div>
+
+<!-- ══ NO ACCESS ══════════════════════════════════════════ -->
+<div id="noAccessScreen">
+  <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+  <h2>Niste registrovani</h2>
+  <p>Kontaktirajte administratora da vam dodeli pristup.</p>
+  <button class="btn-logout" onclick="doLogout()">Odjavi se</button>
+</div>
+
+<!-- ══ HEADER ════════════════════════════════════════════ -->
+<header>
+  <div class="hdr-brand">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+    </svg>
+    <h1>Raspored Sedenja</h1>
+  </div>
+  <div class="hdr-center">
+    <div class="view-toggle">
+      <button class="view-btn active" id="btnViewPlan" onclick="switchView('plan')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Plan
+      </button>
+      <button class="view-btn" id="btnViewGuests" onclick="switchView('guests')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1.5"/><circle cx="3" cy="12" r="1.5"/><circle cx="3" cy="18" r="1.5"/></svg>
+        Spisak gostiju
+      </button>
+    </div>
+    <span class="hdr-stats" id="hdrStats">0/0 raspoređeno</span>
+  </div>
+  <div class="hdr-actions">
+    <button class="btn btn-ghost btn-admin-panel" id="adminPanelBtn" onclick="openAdminPanel()" style="display:none">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      Korisnici
+    </button>
+    <button class="btn btn-green" onclick="exportPlan()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Sačuvaj JSON
+    </button>
+    <label class="btn btn-ghost" style="cursor:pointer">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Učitaj JSON
+      <input type="file" accept=".json" style="display:none" onchange="importPlan(this)">
+    </label>
+    <button class="btn btn-ghost" onclick="window.print()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Štampaj
+    </button>
+    <button class="btn btn-lock" id="lockBtn" onclick="toggleLock()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Zaključaj
+    </button>
+  </div>
+</header>
+
+<!-- ══ APP ════════════════════════════════════════════════ -->
+<div class="app">
+
+  <!-- VIEW 1: FLOOR PLAN (admin only) -->
+  <div id="viewPlan">
+    <div class="sidebar">
+      <div class="sb-section">
+        <h3>Dodaj Sto</h3>
+        <div class="shape-row">
+          <div class="shape-btn active" id="shpRound" onclick="selShape('round')">
+            <svg width="28" height="28" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            Okrugli
+          </div>
+          <div class="shape-btn" id="shpRect" onclick="selShape('rect')">
+            <svg width="28" height="28" viewBox="0 0 32 32"><rect x="4" y="9" width="24" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            Pravougaoni
+          </div>
+          <div class="shape-btn" id="shpOval" onclick="selShape('oval')">
+            <svg width="28" height="28" viewBox="0 0 32 32"><ellipse cx="16" cy="16" rx="13" ry="8" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            Ovalni
+          </div>
+        </div>
+        <div class="field-row">
+          <label>Broj mesta</label>
+          <input type="number" id="seatsInp" value="8" min="1" max="30">
+        </div>
+        <div class="field-row" style="margin-top:8px">
+          <label>Broj stola</label>
+          <input type="number" id="numInp" value="" min="1" placeholder="auto">
+        </div>
+        <button class="btn btn-gold" style="width:100%;justify-content:center;margin-top:11px" onclick="addTable()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Dodaj sto
+        </button>
+      </div>
+
+      <div class="sb-section">
+        <h3>Gosti</h3>
+        <div class="guest-input-row">
+          <input type="text" id="guestInput" placeholder="Ime i prezime…" onkeydown="if(event.key==='Enter')addGuest()">
+          <button class="btn btn-gold" onclick="addGuest()" style="padding:8px 12px;min-height:38px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="sb-scroll" id="sidebarGuests"></div>
+    </div>
+
+    <div class="room-wrap" id="roomWrap">
+      <div class="room-canvas" id="roomCanvas"></div>
+      <div class="detail-panel" id="detailPanel"></div>
+      <div class="room-legend">Povuci goste na sto · klikni sto za detalje</div>
+    </div>
+  </div>
+
+  <!-- VIEW 2: GUEST LIST -->
+  <div id="viewGuests">
+    <div class="gl-toolbar">
+      <input class="gl-search" id="glSearch" type="search" placeholder="Pretraži po imenu…" oninput="renderGuestView()">
+      <div class="gl-sort-toggle">
+        <button class="gl-sort-btn active" id="sortAlpha" onclick="setGlSort('alpha')">A–Z</button>
+        <button class="gl-sort-btn" id="sortTable" onclick="setGlSort('table')">Po stolu</button>
+      </div>
+    </div>
+    <div class="gl-summary" id="glSummary">Učitavanje…</div>
+    <div class="gl-body" id="glBody"></div>
+  </div>
+
+</div><!-- /.app -->
+
+<!-- ══ DETAIL PANEL fills by JS ══ -->
+
+<!-- ══ GUEST MODAL ════════════════════════════════════════ -->
+<div class="modal-overlay" id="guestModal">
+  <div class="modal">
+    <div class="modal-hdr">
+      <h2 id="guestModalTitle">Uredi gosta</h2>
+      <button class="modal-close" onclick="closeGuestModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Ime i prezime</label>
+        <input type="text" id="modalName" placeholder="Ime i prezime">
+      </div>
+      <div class="toggle-row">
+        <label>Pratilac (+1)</label>
+        <label class="toggle-sw">
+          <input type="checkbox" id="modalPlusOneChk" onchange="onPlusOneChange()">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+      <input type="text" class="plusone-name" id="modalPlusOneName" placeholder="Ime pratioca (opciono)">
+      <div class="child-row">
+        <label>Deca</label>
+        <div class="child-stepper">
+          <button onclick="stepChild(-1)">−</button>
+          <span id="childCount">0</span>
+          <button onclick="stepChild(1)">+</button>
+        </div>
+      </div>
+      <div class="modal-row">
+        <button class="btn btn-danger" onclick="delGuestFromModal()">Izbriši</button>
+        <button class="btn btn-gold" onclick="saveGuestModal()">Sačuvaj</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ ADMIN PANEL ════════════════════════════════════════ -->
+<div class="modal-overlay" id="adminPanelModal">
+  <div class="modal admin-panel-modal">
+    <div class="modal-hdr">
+      <h2>Upravljanje korisnicima</h2>
+      <button class="modal-close" onclick="closeAdminPanel()">×</button>
+    </div>
+    <div class="modal-body">
+
+      <div class="admin-who">
+        <div class="admin-who-email">Prijavljeni kao: <strong id="adminEmailDisplay"></strong></div>
+        <button class="btn btn-ghost" style="font-size:11px;padding:5px 10px" onclick="doLogout()">Odjavi se</button>
+      </div>
+
+      <div class="admin-section-title">Hostese</div>
+      <div id="hostessList"><em style="font-size:13px;color:var(--muted)">Učitavanje…</em></div>
+
+      <div class="admin-create-form">
+        <div class="admin-section-title" style="margin-top:16px">Nova hostesa</div>
+        <div class="field"><label>Ime i prezime</label><input type="text" id="hName" placeholder="Ana Jovanović"></div>
+        <div class="field"><label>Email</label><input type="email" id="hEmail" placeholder="ana@email.com"></div>
+        <div class="field"><label>Lozinka</label><input type="password" id="hPass" placeholder="min. 6 znakova"></div>
+        <div class="admin-form-error" id="hError"></div>
+        <button class="btn btn-gold" style="width:100%;justify-content:center" onclick="createHostess()" id="hCreateBtn">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Kreiraj nalog hostese
+        </button>
+      </div>
+
+      <div class="admin-migrate">
+        <div class="admin-section-title">Migracija</div>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Ako imate plan sačuvan u lokalnoj memoriji starog sajta, možete ga preneti ovde.</p>
+        <button class="btn btn-ghost" style="font-size:12px" onclick="migrateFromLocal()">
+          Uvezi iz lokalne memorije
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- drag ghost -->
+<div id="drag-ghost"></div>
+<div id="toast" class="toast"></div>
+
+<!-- ══ FIREBASE SDK ════════════════════════════════════════ -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+<script>
+// ══ FIREBASE CONFIG ═══════════════════════════════════════
+// Paste your Firebase web app config here (same as in index.html):
+const firebaseConfig = {
+  apiKey:            "AIzaSyBWMxb9Au5T9eIDgfQOb_eldm_lBc9Zu94",
+  authDomain:        "vencanje-planer.firebaseapp.com",
+  projectId:         "vencanje-planer",
+  storageBucket:     "vencanje-planer.firebasestorage.app",
+  messagingSenderId: "461796715872",
+  appId:             "1:461796715872:web:6dba54cebc366f466d4205"
+};
+
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.firestore();
+
+// ══ STATE ═════════════════════════════════════════════════
+let currentUser = null;
+let currentRole = null;  // 'admin' | 'hostess'
+
+let tables = [], guests = [], arrivedStatus = {};
+let nextTid = 1, nextGid = 1;
+let isLocked = false;
+
+let selTbl = null, curShape = 'round';
+let touchSelGid = null, gDragId = null;
+let glSort = 'alpha', editGid = null;
+let currentView = 'plan';
+let planListener = null;
+let initialLoadDone = false;
+let saveTimer;
+
+// ══ AUTH GATE ═════════════════════════════════════════════
+auth.onAuthStateChanged(async user => {
+  if (!user) {
+    window.location.replace('/');
+    return;
+  }
+  currentUser = user;
+  await initApp();
+});
+
+async function initApp() {
+  let userDoc = await db.doc('users/' + currentUser.uid).get();
+
+  if (!userDoc.exists) {
+    // Check if setup has been done (meta/setup readable by any authenticated user)
+    const setupDoc = await db.doc('meta/setup').get();
+    if (!setupDoc.exists) {
+      // First user ever — set as admin and mark setup done
+      await db.doc('users/' + currentUser.uid).set({
+        role: 'admin',
+        email: currentUser.email,
+        displayName: currentUser.displayName || currentUser.email,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      await db.doc('meta/setup').set({
+        done: true,
+        adminUid: currentUser.uid,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      currentRole = 'admin';
+    } else {
+      // No role — show unregistered screen
+      hideLoading();
+      document.getElementById('noAccessScreen').style.display = 'flex';
+      return;
+    }
+  } else {
+    currentRole = userDoc.data().role;
+    if (!currentRole || (currentRole !== 'admin' && currentRole !== 'hostess')) {
+      hideLoading();
+      document.getElementById('noAccessScreen').style.display = 'flex';
+      return;
+    }
+  }
+
+  applyRoleUI();
+  startPlanListener();
+}
+
+// ══ ROLE UI ═══════════════════════════════════════════════
+function applyRoleUI() {
+  if (currentRole === 'hostess') {
+    document.body.classList.add('hostess-mode');
+    switchView('guests');
+  } else {
+    document.getElementById('adminPanelBtn').style.display = '';
+    document.getElementById('adminEmailDisplay').textContent = currentUser.email;
+  }
+}
+
+function hideLoading() {
+  const el = document.getElementById('loadScreen');
+  el.classList.add('out');
+  setTimeout(() => el.style.display = 'none', 400);
+}
+
+// ══ FIRESTORE LISTENER ════════════════════════════════════
+function startPlanListener() {
+  planListener = db.doc('plans/main').onSnapshot({ includeMetadataChanges: true }, snap => {
+    if (!snap.exists) {
+      hideLoading();
+      renderSidebar();
+      updateStats();
+      return;
+    }
+    const d = snap.data();
+    if (!initialLoadDone) {
+      loadPlanFromFirestore(d);
+      initialLoadDone = true;
+      hideLoading();
+      if (currentRole === 'admin' && isLocked) applyLockUI();
+      if (currentRole === 'hostess') switchView('guests');
+      return;
+    }
+    if (snap.metadata.hasPendingWrites) return;
+    if (currentRole === 'admin') {
+      // Only sync arrivedStatus from remote
+      arrivedStatus = d.arrivedStatus || {};
+      guests.forEach(g => { g.arrived = arrivedStatus[String(g.id)] || false; });
+      if (currentView === 'guests') renderGuestView();
+      updateStats();
+    } else {
+      loadPlanFromFirestore(d);
+    }
+  }, err => {
+    console.error('Plan listener error:', err);
+    hideLoading();
+    toast('Greška pri učitavanju: ' + err.message);
+  });
+}
+
+function loadPlanFromFirestore(d) {
+  tables = d.tables || [];
+  guests = (d.guests || []).map(g => ({ arrived: false, ...g }));
+  arrivedStatus = d.arrivedStatus || {};
+  nextTid = d.nextTid || 1;
+  nextGid = d.nextGid || 1;
+  isLocked = d.isLocked || false;
+  guests.forEach(g => { g.arrived = arrivedStatus[String(g.id)] || false; });
+  rebuildDOM();
+  updateStats();
+}
+
+// ══ SAVE ══════════════════════════════════════════════════
+function savePlan() {
+  if (currentRole !== 'admin') return;
+  const data = { tables, guests, nextTid, nextGid, isLocked, arrivedStatus,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp() };
+  db.doc('plans/main').set(data).catch(e => toast('Greška: ' + e.message));
+}
+function qSave() { clearTimeout(saveTimer); saveTimer = setTimeout(savePlan, 800); }
+
+// ══ LOGOUT ════════════════════════════════════════════════
+async function doLogout() {
+  if (planListener) planListener();
+  await auth.signOut();
+  window.location.replace('/');
+}
+
+// ══ VIEWS ═════════════════════════════════════════════════
+function switchView(v) {
+  currentView = v;
+  const vp = document.getElementById('viewPlan');
+  const vg = document.getElementById('viewGuests');
+  const bp = document.getElementById('btnViewPlan');
+  const bg = document.getElementById('btnViewGuests');
+  if (v === 'plan') {
+    vp.style.display = 'flex'; vg.classList.remove('active');
+    bp.classList.add('active'); bg.classList.remove('active');
+  } else {
+    vp.style.display = 'none'; vg.classList.add('active');
+    bp.classList.remove('active'); bg.classList.add('active');
+    renderGuestView();
+  }
+}
+
+// ══ TABLE MANAGEMENT ══════════════════════════════════════
+const SHAPES = { round:{w:108,h:108}, rect:{w:130,h:88}, oval:{w:130,h:90} };
+
+function selShape(s) {
+  curShape = s;
+  ['Round','Rect','Oval'].forEach(x => document.getElementById('shp'+x).classList.toggle('active', x.toLowerCase()===s));
+}
+
+function addTable() {
+  const seats = parseInt(document.getElementById('seatsInp').value) || 8;
+  const numVal = document.getElementById('numInp').value.trim();
+  const number = numVal ? parseInt(numVal) : nextTid;
+  const sh = SHAPES[curShape];
+  const canvas = document.getElementById('roomCanvas');
+  const cw = canvas.offsetWidth || 800, ch = canvas.offsetHeight || 600;
+  const t = { id: nextTid++, number, name: 'Sto ' + number, seats, shape: curShape, guests: [],
+    x: Math.round((cw/2 - sh.w/2 + (Math.random()-0.5)*80) / 40) * 40,
+    y: Math.round((ch/2 - sh.h/2 + (Math.random()-0.5)*60) / 40) * 40 };
+  tables.push(t);
+  renderTable(t);
+  renderSidebar(); updateStats(); qSave();
+}
+
+function renderTable(t) {
+  const sh = SHAPES[t.shape] || SHAPES.round;
+  const used = tblSeatsUsed(t);
+  const fillCls = used === 0 ? 'f-empty' : used >= t.seats ? 'f-full' : 'f-ok';
+  const fillTxt = used === 0 ? '—' : used + '/' + t.seats + ' os.';
+  let el = document.getElementById('tw-' + t.id);
+  if (!el) {
+    el = document.createElement('div');
+    el.className = 'table-widget';
+    el.id = 'tw-' + t.id;
+    document.getElementById('roomCanvas').appendChild(el);
+    attachTableDrag(el, t.id);
+    el.addEventListener('click', e => { if (!e.defaultPrevented) handleTableClick(t.id); });
+  }
+  el.style.cssText = `left:${t.x}px;top:${t.y}px;width:${sh.w}px;height:${sh.h}px`;
+  el.innerHTML = `
+    <div class="table-face ${t.shape}" style="width:${sh.w}px;height:${sh.h}px">
+      ${t.number ? `<div class="tbl-num">#${t.number}</div>` : ''}
+      <div class="tbl-name">${esc(t.name)}</div>
+      <div class="tbl-cap">${t.seats} mesta</div>
+      <div class="tbl-fill ${fillCls}">${fillTxt}</div>
+    </div>
+    <div class="tbl-del" onclick="event.stopPropagation();delTable(${t.id})">×</div>`;
+  el.classList.toggle('selected', selTbl === t.id);
+}
+
+function rerender(id) { const t = tables.find(x => x.id === id); if (t) renderTable(t); }
+
+function tblSeatsUsed(t) {
+  return (t.guests || []).reduce((s, gid) => {
+    const g = guests.find(x => x.id === gid);
+    return s + (g ? gSeatCount(g) : 0);
+  }, 0);
+}
+function gSeatCount(g) { return 1 + (g.plusOne ? 1 : 0) + (g.children || 0); }
+
+function handleTableClick(id) {
+  if (touchSelGid !== null) { assignGuestToTable(touchSelGid, id); return; }
+  selTbl = selTbl === id ? null : id;
+  tables.forEach(t => { const el = document.getElementById('tw-' + t.id); if (el) el.classList.toggle('selected', t.id === selTbl); });
+  selTbl ? openPanel(selTbl) : closePanel();
+}
+
+function delTable(id) {
+  const t = tables.find(x => x.id === id); if (!t) return;
+  t.guests.forEach(gid => { const g = guests.find(x => x.id === gid); if (g) g.tableId = null; });
+  tables = tables.filter(x => x.id !== id);
+  const el = document.getElementById('tw-' + id); if (el) el.remove();
+  if (selTbl === id) { selTbl = null; closePanel(); }
+  renderSidebar(); updateStats(); qSave();
+}
+
+// ══ TABLE DRAG ════════════════════════════════════════════
+function attachTableDrag(el, tid) {
+  let pid = null, ox, oy, sx, sy, dragging = false;
+  el.addEventListener('pointerdown', e => {
+    if (e.target.closest('.tbl-del')) return;
+    if (pid !== null) return;
+    e.preventDefault();
+    pid = e.pointerId; sx = e.clientX; sy = e.clientY; dragging = false;
+    const t = tables.find(x => x.id === tid);
+    ox = e.clientX - t.x; oy = e.clientY - t.y;
+    el.setPointerCapture(e.pointerId);
+  });
+  el.addEventListener('pointermove', e => {
+    if (e.pointerId !== pid) return;
+    if (!dragging && (Math.abs(e.clientX - sx) > 5 || Math.abs(e.clientY - sy) > 5)) { dragging = true; }
+    if (!dragging) return;
+    e.preventDefault();
+    const t = tables.find(x => x.id === tid); if (!t) return;
+    t.x = Math.round((e.clientX - ox) / 10) * 10;
+    t.y = Math.round((e.clientY - oy) / 10) * 10;
+    el.style.left = t.x + 'px'; el.style.top = t.y + 'px';
+  });
+  el.addEventListener('pointerup', e => {
+    if (e.pointerId !== pid) return;
+    pid = null;
+    if (dragging) { e.preventDefault(); qSave(); }
+  });
+}
+
+// ══ DETAIL PANEL ══════════════════════════════════════════
+function openPanel(id) {
+  const t = tables.find(x => x.id === id); if (!t) return;
+  const p = document.getElementById('detailPanel');
+  p.classList.add('open');
+  refreshPanel();
+}
+function closePanel() { document.getElementById('detailPanel').classList.remove('open'); }
+
+function refreshPanel() {
+  if (!selTbl) return;
+  const t = tables.find(x => x.id === selTbl);
+  if (!t) { closePanel(); return; }
+  const used = tblSeatsUsed(t);
+  const slots = (t.guests || []).map(gid => {
+    const g = guests.find(x => x.id === gid);
+    if (!g) return '';
+    const sub = [];
+    if (g.plusOne) sub.push('+1' + (g.plusOneName ? ' (' + g.plusOneName + ')' : ''));
+    if (g.children) sub.push(g.children + ' dete/dece');
+    return `<div class="dp-slot">
+      <div style="flex:1">
+        <div class="dp-slot-name">${esc(g.name)}</div>
+        ${sub.length ? `<div class="dp-slot-sub">${esc(sub.join(' · '))}</div>` : ''}
+      </div>
+      <button class="dp-slot-rm" onclick="removeFromTable(${t.id},${gid})">×</button>
+    </div>`;
+  }).join('');
+  document.getElementById('detailPanel').innerHTML = `
+    <h3>Detalji stola</h3>
+    <div class="dp-field">
+      <label>Broj stola</label>
+      <input type="number" value="${t.number || ''}" placeholder="—"
+        onchange="t=tables.find(x=>x.id===${t.id});if(t){t.number=+this.value||null;rerender(${t.id});qSave()}">
+    </div>
+    <div class="dp-field">
+      <label>Naziv</label>
+      <input type="text" value="${esc(t.name || '')}"
+        onchange="t=tables.find(x=>x.id===${t.id});if(t){t.name=this.value;rerender(${t.id});qSave()}">
+    </div>
+    <div class="dp-field">
+      <label>Broj mesta</label>
+      <input type="number" value="${t.seats}" min="1" max="30"
+        onchange="t=tables.find(x=>x.id===${t.id});if(t){t.seats=+this.value||1;rerender(${t.id});renderSidebar();updateStats();qSave()}">
+    </div>
+    <div class="dp-slots">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:6px">${used}/${t.seats} mesta zauzeto</div>
+      ${slots || '<div class="dp-empty">Nema gostiju za ovaj sto</div>'}
+    </div>
+    <div class="dp-actions">
+      <button class="btn btn-danger" onclick="delTable(${t.id})" style="font-size:11px">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/></svg>
+        Izbriši sto
+      </button>
+    </div>`;
+}
+
+function removeFromTable(tid, gid) {
+  const t = tables.find(x => x.id === tid);
+  const g = guests.find(x => x.id === gid);
+  if (!t || !g) return;
+  t.guests = t.guests.filter(x => x !== gid);
+  g.tableId = null;
+  rerender(tid); renderSidebar(); refreshPanel(); updateStats(); qSave();
+  if (currentView === 'guests') renderGuestView();
+}
+
+// ══ GUEST ASSIGNMENT ══════════════════════════════════════
+function assignGuestToTable(gid, tid) {
+  const g = guests.find(x => x.id === gid);
+  const t = tables.find(x => x.id === tid);
+  if (!g || !t) return;
+  // Remove from old table
+  if (g.tableId) {
+    const old = tables.find(x => x.id === g.tableId);
+    if (old) { old.guests = old.guests.filter(x => x !== gid); rerender(old.id); }
+  }
+  const needed = gSeatCount(g);
+  const free = t.seats - tblSeatsUsed(t);
+  if (free < needed) { toast(`Nema dovoljno mesta (treba ${needed}, slobodno ${free})`); clearTouch(); return; }
+  g.tableId = tid;
+  if (!t.guests.includes(gid)) t.guests.push(gid);
+  rerender(tid);
+  clearTouch();
+  renderSidebar(); updateStats(); qSave();
+  if (selTbl === tid) refreshPanel();
+  if (currentView === 'guests') renderGuestView();
+}
+
+// ══ TOUCH-TAP ASSIGN ══════════════════════════════════════
+function onGuestTap(gid) {
+  if (touchSelGid === gid) { clearTouch(); return; }
+  touchSelGid = gid;
+  document.querySelectorAll('.guest-item').forEach(el => el.classList.remove('sel-touch'));
+  const el = document.getElementById('gi-' + gid);
+  if (el) el.classList.add('sel-touch');
+  toast('Tapni sto da dodeliš gosta');
+}
+function clearTouch() {
+  touchSelGid = null;
+  document.querySelectorAll('.guest-item').forEach(el => el.classList.remove('sel-touch'));
+}
+
+// ══ GUEST POINTER DRAG ════════════════════════════════════
+const ghost = document.getElementById('drag-ghost');
+
+function attachGuestDrag(el, gid) {
+  let pid = null, sx, sy, dragging = false;
+  const THRESH = 7;
+  el.addEventListener('pointerdown', e => {
+    if (e.target.closest('.guest-edit-btn') || e.target.closest('.guest-del-btn')) return;
+    if (pid !== null) return;
+    e.preventDefault();
+    pid = e.pointerId; sx = e.clientX; sy = e.clientY; dragging = false;
+    el.setPointerCapture(e.pointerId);
+  });
+  el.addEventListener('pointermove', e => {
+    if (e.pointerId !== pid) return;
+    if (!dragging && (Math.abs(e.clientX - sx) > THRESH || Math.abs(e.clientY - sy) > THRESH)) {
+      dragging = true; gDragId = gid;
+      el.classList.add('dragging-now');
+      const g = guests.find(x => x.id === gid);
+      ghost.style.display = 'flex';
+      ghost.innerHTML = `<div class="guest-avatar" style="width:22px;height:22px;font-size:10px">${(g?.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>${esc(g?.name||'')}`;
+      clearTouch();
+    }
+    if (dragging) {
+      ghost.style.left = (e.clientX - 20) + 'px';
+      ghost.style.top  = (e.clientY - 20) + 'px';
+      hlTblAt(e.clientX, e.clientY);
+    }
+  });
+  el.addEventListener('pointerup', e => {
+    if (e.pointerId !== pid) return;
+    pid = null;
+    ghost.style.display = 'none';
+    el.classList.remove('dragging-now');
+    if (dragging) {
+      e.preventDefault();
+      const els = document.elementsFromPoint(e.clientX, e.clientY);
+      const tw = els.find(x => x.classList && x.classList.contains('table-widget'));
+      if (tw) {
+        const tid = parseInt(tw.id.replace('tw-', ''));
+        assignGuestToTable(gDragId, tid);
+      }
+      document.querySelectorAll('.table-face').forEach(f => f.classList.remove('drop-hl'));
+      gDragId = null;
+    } else {
+      onGuestTap(gid);
+    }
+    dragging = false;
+  });
+}
+
+function hlTblAt(cx, cy) {
+  document.querySelectorAll('.table-face').forEach(f => f.classList.remove('drop-hl'));
+  const els = document.elementsFromPoint(cx, cy);
+  const tw = els.find(x => x.classList && x.classList.contains('table-widget'));
+  if (tw) {
+    const face = tw.querySelector('.table-face');
+    if (face) face.classList.add('drop-hl');
+  }
+}
+
+// ══ GUEST CRUD ════════════════════════════════════════════
+function addGuest() {
+  if (currentRole !== 'admin') return;
+  const inp = document.getElementById('guestInput');
+  const name = inp.value.trim(); if (!name) return;
+  guests.push({ id: nextGid++, name, plusOne: false, plusOneName: '', children: 0, tableId: null, arrived: false });
+  inp.value = '';
+  renderSidebar(); updateStats(); qSave();
+  inp.focus();
+}
+
+function renderSidebar() {
+  const c = document.getElementById('sidebarGuests');
+  if (!c) return;
+  if (!guests.length) {
+    c.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:14px;text-align:center;font-family:var(--font-ui)">Dodaj goste iz panela iznad</div>';
+    return;
+  }
+  c.innerHTML = guests.map(g => {
+    const t = g.tableId ? tables.find(x => x.id === g.tableId) : null;
+    const init = (g.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const isSel = touchSelGid === g.id;
+    const sub = [];
+    if (g.plusOne) sub.push(`<span class="badge badge-plus">+1${g.plusOneName ? ' — '+g.plusOneName : ''}</span>`);
+    if (g.children) sub.push(`<span class="badge badge-kid">${g.children}👶</span>`);
+    if (t) sub.push(`<span class="badge badge-tbl">${t.number ? '#'+t.number+' ' : ''}${t.name||'Sto'}</span>`);
+    return `<div class="guest-item ${g.tableId?'assigned':''} ${isSel?'sel-touch':''}" id="gi-${g.id}" data-gid="${g.id}">
+      <div class="guest-avatar ${g.tableId?'assigned':''}">${init}</div>
+      <div class="guest-info">
+        <div class="guest-name">${esc(g.name)}</div>
+        ${sub.length ? `<div class="guest-meta">${sub.join('')}</div>` : ''}
+      </div>
+      <button class="guest-edit-btn" onclick="event.stopPropagation();openGuestModal(${g.id})" title="Uredi">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
+      <button class="guest-del-btn" onclick="event.stopPropagation();delGuest(${g.id})" title="Izbriši">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>`;
+  }).join('');
+  guests.forEach(g => {
+    const el = document.getElementById('gi-' + g.id);
+    if (el) attachGuestDrag(el, g.id);
+  });
+}
+
+function delGuest(id) {
+  const g = guests.find(x => x.id === id); if (!g) return;
+  if (g.tableId) {
+    const t = tables.find(x => x.id === g.tableId);
+    if (t) t.guests = t.guests.filter(x => x !== id);
+    rerender(g.tableId);
+    if (selTbl === g.tableId) refreshPanel();
+  }
+  guests = guests.filter(x => x.id !== id);
+  delete arrivedStatus[String(id)];
+  if (touchSelGid === id) clearTouch();
+  renderSidebar(); updateStats(); qSave();
+  if (currentView === 'guests') renderGuestView();
+}
+
+// ══ GUEST MODAL ═══════════════════════════════════════════
+let modalChildren = 0;
+
+function openGuestModal(id) {
+  if (currentRole !== 'admin') return;
+  const g = guests.find(x => x.id === id); if (!g) return;
+  editGid = id;
+  document.getElementById('guestModalTitle').textContent = g.name;
+  document.getElementById('modalName').value = g.name;
+  document.getElementById('modalPlusOneChk').checked = g.plusOne;
+  document.getElementById('modalPlusOneName').value = g.plusOneName || '';
+  document.getElementById('modalPlusOneName').classList.toggle('show', g.plusOne);
+  modalChildren = g.children || 0;
+  document.getElementById('childCount').textContent = modalChildren;
+  document.getElementById('guestModal').classList.add('open');
+}
+function closeGuestModal() { document.getElementById('guestModal').classList.remove('open'); editGid = null; }
+function onPlusOneChange() {
+  document.getElementById('modalPlusOneName').classList.toggle('show', document.getElementById('modalPlusOneChk').checked);
+}
+function stepChild(d) {
+  modalChildren = Math.max(0, modalChildren + d);
+  document.getElementById('childCount').textContent = modalChildren;
+}
+function saveGuestModal() {
+  const g = guests.find(x => x.id === editGid); if (!g) return;
+  g.name = document.getElementById('modalName').value.trim() || g.name;
+  g.plusOne = document.getElementById('modalPlusOneChk').checked;
+  g.plusOneName = document.getElementById('modalPlusOneName').value.trim();
+  g.children = modalChildren;
+  closeGuestModal();
+  renderSidebar(); updateStats(); qSave();
+  if (currentView === 'guests') renderGuestView();
+  if (g.tableId) { rerender(g.tableId); if (selTbl === g.tableId) refreshPanel(); }
+}
+function delGuestFromModal() { const id = editGid; closeGuestModal(); delGuest(id); }
+
+// ══ GUEST LIST VIEW ═══════════════════════════════════════
+function setGlSort(s) {
+  glSort = s;
+  document.getElementById('sortAlpha').classList.toggle('active', s === 'alpha');
+  document.getElementById('sortTable').classList.toggle('active', s === 'table');
+  renderGuestView();
+}
+
+function renderGuestView() {
+  const query = (document.getElementById('glSearch')?.value || '').toLowerCase();
+  let filtered = guests.filter(g =>
+    g.name.toLowerCase().includes(query) || (g.plusOneName || '').toLowerCase().includes(query)
+  );
+  const total = guests.length;
+  const assigned = guests.filter(g => g.tableId).length;
+  const arrivedCount = guests.filter(g => g.arrived).length;
+  const totalPeople = guests.reduce((s, g) => s + gSeatCount(g), 0);
+  const locked = currentRole === 'hostess' || isLocked;
+  document.getElementById('glSummary').textContent = locked
+    ? `${arrivedCount}/${total} stiglo · ${assigned}/${total} raspoređeno`
+    : `${assigned}/${total} gostiju raspoređeno · ${totalPeople} ukupno osoba`;
+
+  const body = document.getElementById('glBody');
+
+  if (glSort === 'alpha') {
+    filtered.sort((a, b) => a.name.localeCompare(b.name, 'sr'));
+    body.innerHTML = filtered.map(g => glCard(g)).join('')
+      || '<div style="padding:24px;text-align:center;color:var(--muted);font-family:var(--font-ui);font-size:14px">Nema rezultata</div>';
+  } else {
+    const asgnd = filtered.filter(g => g.tableId);
+    const unasgnd = filtered.filter(g => !g.tableId);
+    const byTable = {};
+    asgnd.forEach(g => { if (!byTable[g.tableId]) byTable[g.tableId] = []; byTable[g.tableId].push(g); });
+    const sortedTids = Object.keys(byTable).sort((a, b) => {
+      const ta = tables.find(x => x.id === +a), tb = tables.find(x => x.id === +b);
+      return (ta?.number || 99) - (tb?.number || 99);
+    });
+    let html = '';
+    sortedTids.forEach(tid => {
+      const t = tables.find(x => x.id === +tid); if (!t) return;
+      const used = tblSeatsUsed(t);
+      html += `<div class="gl-group-hdr">
+        <div class="gl-group-num">${t.number || '?'}</div>
+        <div><div class="gl-group-name">${esc(t.name || 'Sto')}</div>
+        <div class="gl-group-meta">${used}/${t.seats} mesta zauzeto</div></div>
+        <div class="gl-group-line"></div></div>`;
+      html += byTable[tid].map(g => glCard(g, false)).join('');
+    });
+    if (unasgnd.length) {
+      html += `<div class="gl-unassigned-hdr">Neraspoređeni (${unasgnd.length})</div>`;
+      html += unasgnd.map(g => glCard(g)).join('');
+    }
+    body.innerHTML = html || '<div style="padding:24px;text-align:center;color:var(--muted);font-size:14px">Nema gostiju</div>';
+  }
+
+  const locked2 = currentRole === 'hostess' || isLocked;
+  if (locked2) {
+    // Click on card = toggleArrived (already wired inline in glCard)
+  } else {
+    guests.forEach(g => {
+      const el = document.getElementById('glc-' + g.id);
+      if (el) el.addEventListener('click', () => openGuestModal(g.id));
+    });
+  }
+}
+
+function glCard(g, showTable = true) {
+  const t = g.tableId ? tables.find(x => x.id === g.tableId) : null;
+  const init = (g.name||'?').split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  const sub = [];
+  if (g.plusOne) sub.push('+1' + (g.plusOneName ? ' (' + g.plusOneName + ')' : ''));
+  if (g.children) sub.push(g.children + ' ' + (g.children === 1 ? 'dete' : 'dece'));
+  const locked = currentRole === 'hostess' || isLocked;
+  const arrivedCls = g.arrived ? 'arrived' : '';
+  if (locked) {
+    const chk = g.arrived ? 'checked' : '';
+    return `<div class="gl-card ${arrivedCls}" id="glc-${g.id}" onclick="toggleArrived(${g.id})">
+      <div class="gl-card-avatar ${t ? 'ok' : 'unassigned'}">${init}</div>
+      <div class="gl-card-info">
+        <div class="gl-card-name">${esc(g.name)}</div>
+        ${sub.length ? `<div class="gl-card-sub">${sub.map(s => `<span>${esc(s)}</span>`).join('<span style="color:var(--border-mid)">·</span>')}</div>` : ''}
+      </div>
+      ${showTable ? `<div class="gl-card-tbl">
+        ${t ? `<div class="gl-card-tbl-num">${t.number ? '#'+t.number : ''}</div><div class="gl-card-tbl-name">${esc(t.name||'Sto')}</div>`
+             : `<div style="font-size:12px;color:var(--muted)">—</div>`}
+      </div>` : ''}
+      <button class="gl-check-btn ${chk}" onclick="event.stopPropagation();toggleArrived(${g.id})" title="Označi kao stigao">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </button>
+    </div>`;
+  }
+  return `<div class="gl-card" id="glc-${g.id}">
+    <div class="gl-card-avatar ${t ? 'ok' : 'unassigned'}">${init}</div>
+    <div class="gl-card-info">
+      <div class="gl-card-name">${esc(g.name)}</div>
+      ${sub.length ? `<div class="gl-card-sub">${sub.map(s => `<span>${esc(s)}</span>`).join('<span style="color:var(--border-mid)">·</span>')}</div>` : ''}
+    </div>
+    ${showTable ? `<div class="gl-card-tbl">
+      ${t ? `<div class="gl-card-tbl-num">${t.number ? '#'+t.number : ''}</div><div class="gl-card-tbl-name">${esc(t.name||'Sto')}</div>`
+           : `<div style="font-size:12px;color:var(--muted)">—</div>`}
+    </div>` : ''}
+  </div>`;
+}
+
+// ══ ARRIVED TRACKING ══════════════════════════════════════
+function toggleArrived(gid) {
+  const g = guests.find(x => x.id === gid); if (!g) return;
+  g.arrived = !g.arrived;
+  arrivedStatus[String(gid)] = g.arrived;
+  // Firestore: hostess only updates arrivedStatus, admin does full save
+  db.doc('plans/main').update({ ['arrivedStatus.' + gid]: g.arrived })
+    .catch(e => {
+      // If doc doesn't exist yet (first use), full save
+      if (e.code === 'not-found') savePlan();
+    });
+  updateStats();
+  if (currentView === 'guests') renderGuestView();
+}
+
+// ══ STATS ═════════════════════════════════════════════════
+function updateStats() {
+  const asgn = guests.filter(g => g.tableId).length;
+  const tot  = guests.length;
+  const seats = tables.reduce((s, t) => s + t.seats, 0);
+  const arrivedCount = guests.filter(g => g.arrived).length;
+  const locked = currentRole === 'hostess' || isLocked;
+  document.getElementById('hdrStats').textContent = locked
+    ? `${arrivedCount}/${tot} stiglo · ${tables.length} stolova`
+    : `${asgn}/${tot} raspoređeno · ${tables.length} stolova · ${seats} mesta`;
+}
+
+// ══ LOCK MODE (admin only) ════════════════════════════════
+function toggleLock() {
+  if (currentRole !== 'admin') return;
+  isLocked = !isLocked;
+  const btn = document.getElementById('lockBtn');
+  if (isLocked) {
+    document.body.classList.add('admin-locked');
+    btn.classList.replace('btn-lock', 'btn-unlock');
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 5-5 5 5 0 0 1 5 5v4"/></svg> Otključaj`;
+    switchView('guests');
+    toast('Zaključano — hostesa mode aktivan ✓');
+  } else {
+    document.body.classList.remove('admin-locked');
+    btn.classList.replace('btn-unlock', 'btn-lock');
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Zaključaj`;
+    toast('Otključano — edit mod aktivan');
+  }
+  updateStats();
+  if (currentView === 'guests') renderGuestView();
+  qSave();
+}
+
+function applyLockUI() {
+  const btn = document.getElementById('lockBtn');
+  if (isLocked && currentRole === 'admin') {
+    document.body.classList.add('admin-locked');
+    btn.classList.replace('btn-lock', 'btn-unlock');
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 5-5 5 5 0 0 1 5 5v4"/></svg> Otključaj`;
+  }
+}
+
+// ══ EXPORT / IMPORT JSON ══════════════════════════════════
+function exportPlan() {
+  const blob = new Blob([JSON.stringify({ tables, guests, nextTid, nextGid, arrivedStatus }, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'vencanje-raspored.json';
+  a.click();
+  toast('JSON fajl sačuvan');
+}
+
+function importPlan(inp) {
+  const file = inp.files[0]; if (!file) return;
+  const r = new FileReader();
+  r.onload = e => {
+    try {
+      const d = JSON.parse(e.target.result);
+      tables = d.tables || [];
+      guests = (d.guests || []).map(g => ({ arrived: false, ...g }));
+      nextTid = d.nextTid || 1;
+      nextGid = d.nextGid || 1;
+      arrivedStatus = d.arrivedStatus || {};
+      guests.forEach(g => { g.arrived = arrivedStatus[String(g.id)] || false; });
+      isLocked = false;
+      savePlan();
+      rebuildDOM();
+      toast('Plan učitan iz JSON fajla ✓');
+    } catch (_) { toast('Greška pri učitavanju fajla'); }
+    inp.value = '';
+  };
+  r.readAsText(file);
+}
+
+function migrateFromLocal() {
+  try {
+    const d = JSON.parse(localStorage.getItem('vencanje-v2'));
+    if (!d) { toast('Nema podataka u lokalnoj memoriji'); return; }
+    tables = d.tables || [];
+    guests = (d.guests || []).map(g => ({ arrived: false, ...g }));
+    nextTid = d.nextTid || 1;
+    nextGid = d.nextGid || 1;
+    arrivedStatus = {};
+    isLocked = false;
+    savePlan();
+    rebuildDOM();
+    closeAdminPanel();
+    toast('Podaci migrirani ✓');
+  } catch (e) { toast('Greška: ' + e.message); }
+}
+
+// ══ ADMIN PANEL ═══════════════════════════════════════════
+function openAdminPanel() {
+  document.getElementById('adminPanelModal').classList.add('open');
+  loadHostesses();
+}
+function closeAdminPanel() {
+  document.getElementById('adminPanelModal').classList.remove('open');
+  document.getElementById('hName').value = '';
+  document.getElementById('hEmail').value = '';
+  document.getElementById('hPass').value = '';
+  document.getElementById('hError').textContent = '';
+}
+
+async function loadHostesses() {
+  const list = document.getElementById('hostessList');
+  list.innerHTML = '<em style="font-size:13px;color:var(--muted)">Učitavanje…</em>';
+  try {
+    const snap = await db.collection('users').where('role', '==', 'hostess').get();
+    if (snap.empty) {
+      list.innerHTML = '<em style="font-size:13px;color:var(--muted)">Nema kreiranih hostesa</em>';
+      return;
+    }
+    list.innerHTML = snap.docs.map(doc => {
+      const d = doc.data();
+      return `<div class="hostess-item">
+        <div class="hostess-item-info">
+          <div class="hostess-item-name">${esc(d.displayName || d.email)}</div>
+          <div class="hostess-item-email">${esc(d.email)}</div>
+        </div>
+        <button class="hostess-item-del" onclick="removeHostess('${doc.id}')" title="Ukloni pristup">×</button>
+      </div>`;
+    }).join('');
+  } catch (e) {
+    list.innerHTML = `<em style="color:var(--danger);font-size:13px">Greška: ${e.message}</em>`;
+  }
+}
+
+async function createHostess() {
+  const name  = document.getElementById('hName').value.trim();
+  const email = document.getElementById('hEmail').value.trim();
+  const pass  = document.getElementById('hPass').value;
+  const errEl = document.getElementById('hError');
+  const btn   = document.getElementById('hCreateBtn');
+  errEl.textContent = '';
+  if (!email || !pass) { errEl.textContent = 'Email i lozinka su obavezni.'; return; }
+  if (pass.length < 6)  { errEl.textContent = 'Lozinka mora imati min. 6 znakova.'; return; }
+  btn.disabled = true; btn.textContent = 'Kreiranje…';
+
+  // Use a secondary Firebase app instance so admin stays logged in
+  const secondaryApp = firebase.initializeApp(firebaseConfig, 'hostess_create_' + Date.now());
+  const secondaryAuth = firebase.auth(secondaryApp);
+  try {
+    const cred = await secondaryAuth.createUserWithEmailAndPassword(email, pass);
+    await db.doc('users/' + cred.user.uid).set({
+      role: 'hostess',
+      email,
+      displayName: name || email,
+      createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    await secondaryApp.delete();
+    document.getElementById('hName').value = '';
+    document.getElementById('hEmail').value = '';
+    document.getElementById('hPass').value = '';
+    toast('Hostesa kreirana ✓');
+    loadHostesses();
+  } catch (e) {
+    try { await secondaryApp.delete(); } catch (_) {}
+    const codes = {
+      'auth/email-already-in-use': 'Ovaj email je već registrovan.',
+      'auth/invalid-email': 'Email adresa nije ispravna.',
+      'auth/weak-password': 'Lozinka je preslaba (min. 6 znakova).'
+    };
+    errEl.textContent = codes[e.code] || e.message;
+  }
+  btn.disabled = false;
+  btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg> Kreiraj nalog hostese`;
+}
+
+async function removeHostess(uid) {
+  if (!confirm('Ukloniti pristup ovoj hostesi?')) return;
+  try {
+    await db.doc('users/' + uid).delete();
+    toast('Pristup uklonjen');
+    loadHostesses();
+  } catch (e) { toast('Greška: ' + e.message); }
+}
+
+// ══ REBUILD DOM ═══════════════════════════════════════════
+function rebuildDOM() {
+  document.getElementById('roomCanvas').innerHTML = '';
+  selTbl = null; closePanel(); touchSelGid = null;
+  tables.forEach(t => renderTable(t));
+  renderSidebar(); updateStats();
+  if (currentView === 'guests') renderGuestView();
+}
+
+// ══ UTILS ═════════════════════════════════════════════════
+function esc(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+let toastT;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ══ CANVAS PAN ════════════════════════════════════════════
+(function () {
+  const wrap   = document.getElementById('roomWrap');
+  const canvas = document.getElementById('roomCanvas');
+  let panX = 0, panY = 0;
+  let panPid = null, panSX, panSY, panOX, panOY;
+
+  function applyPan() {
+    canvas.style.transform = `translate(${panX}px,${panY}px)`;
+    // Scroll the background grid in sync with the canvas so the grid follows the tables
+    wrap.style.backgroundPosition = `${panX % 40}px ${panY % 40}px`;
+  }
+
+  wrap.addEventListener('pointerdown', e => {
+    // Only activate on the bare canvas background — not on any table or UI element
+    if (e.target.id !== 'roomCanvas') return;
+    if (panPid !== null) return;
+    e.preventDefault();
+    panPid = e.pointerId;
+    panSX = e.clientX; panSY = e.clientY;
+    panOX = panX;      panOY = panY;
+    wrap.setPointerCapture(e.pointerId);
+    wrap.classList.add('panning');
+  });
+
+  wrap.addEventListener('pointermove', e => {
+    if (e.pointerId !== panPid) return;
+    panX = panOX + (e.clientX - panSX);
+    panY = panOY + (e.clientY - panSY);
+    applyPan();
+  });
+
+  function stopPan(e) {
+    if (e.pointerId !== panPid) return;
+    panPid = null;
+    wrap.classList.remove('panning');
+  }
+  wrap.addEventListener('pointerup',     stopPan);
+  wrap.addEventListener('pointercancel', stopPan);
+})();
+
+// ══ KEYBOARD ══════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('guestModal').classList.contains('open')) { closeGuestModal(); return; }
+    if (document.getElementById('adminPanelModal').classList.contains('open')) { closeAdminPanel(); return; }
+    clearTouch(); selTbl = null; tables.forEach(t => rerender(t.id)); closePanel();
+  }
+  if (e.key === 'Delete' && selTbl && document.activeElement.tagName !== 'INPUT') {
+    delTable(selTbl);
+  }
+});
+</script>
+</body>
+</html>

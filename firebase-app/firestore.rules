@@ -1,0 +1,56 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuth() {
+      return request.auth != null;
+    }
+    function userRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    function isAdmin() {
+      return isAuth() && userRole() == 'admin';
+    }
+    function isHostess() {
+      return isAuth() && userRole() == 'hostess';
+    }
+    function setupDone() {
+      return exists(/databases/$(database)/documents/meta/setup);
+    }
+
+    // ── META (first-run flag) ───────────────────────────
+    match /meta/setup {
+      allow read: if isAuth();
+      // Anyone can create IF it doesn't exist yet (first admin setup)
+      allow create: if isAuth() && !setupDone();
+      allow update, delete: if isAdmin();
+    }
+
+    // ── USERS ───────────────────────────────────────────
+    match /users/{uid} {
+      // Read own doc, or admin reads all
+      allow read: if isAuth() && (request.auth.uid == uid || isAdmin());
+
+      // First admin: allowed if setup not done yet and creating own doc as admin
+      allow create: if isAuth() && request.auth.uid == uid && (
+        (!setupDone() && request.resource.data.role == 'admin') ||
+        (request.resource.data.role == 'hostess')
+      );
+
+      // Admin can update/delete any user doc
+      allow update, delete: if isAdmin();
+    }
+
+    // ── PLAN ────────────────────────────────────────────
+    match /plans/main {
+      allow read: if isAuth();
+
+      // Admin can do full writes
+      allow write: if isAdmin();
+
+      // Hostess can only update the arrivedStatus map
+      allow update: if isHostess() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['arrivedStatus']);
+    }
+  }
+}

@@ -1,0 +1,1690 @@
+<!DOCTYPE html>
+<html lang="sr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Raspored Sedenja — Venčanje</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Infant:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --navy:       #1a1a2e;
+  --navy-mid:   #252540;
+  --navy-light: #2e2e50;
+  --gold:       #c9a84c;
+  --gold-light: #e8c96a;
+  --gold-dim:   #f0d98c;
+  --gold-muted: #9a7a32;
+  --cream:      #f7f3ec;
+  --cream-dark: #ede7da;
+  --white:      #ffffff;
+  --border:     #e2d9c8;
+  --border-mid: #d0c4ae;
+  --text:       #1e1e2e;
+  --text-mid:   #4a4a6a;
+  --muted:      #8888a8;
+  --success:    #3d9970;
+  --danger:     #c0392b;
+  --warning:    #e67e22;
+
+  --shadow-sm:  0 1px 4px rgba(0,0,0,.08);
+  --shadow-md:  0 4px 16px rgba(0,0,0,.12);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,.18);
+  --radius:     10px;
+  --radius-lg:  16px;
+
+  --font-display: 'Playfair Display', 'Georgia', serif;
+  --font-text:    'Cormorant Infant', 'Georgia', serif;
+  --font-ui:      -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+}
+
+html, body { height: 100%; }
+body {
+  font-family: var(--font-ui);
+  background: var(--cream);
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── HEADER ──────────────────────────────────────────── */
+header {
+  background: var(--navy);
+  padding: 0 16px;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 12px;
+  height: 56px;
+  flex-shrink: 0;
+  border-bottom: 1px solid rgba(201,168,76,.25);
+}
+.hdr-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.hdr-brand h1 {
+  font-family: var(--font-display);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--gold-dim);
+  letter-spacing: .3px;
+  white-space: nowrap;
+}
+.hdr-center {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.view-toggle {
+  display: flex;
+  background: rgba(255,255,255,.07);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+.view-btn {
+  padding: 5px 14px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  color: rgba(255,255,255,.5);
+  background: transparent;
+  transition: all .2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.view-btn.active {
+  background: var(--gold);
+  color: var(--navy);
+}
+.hdr-stats {
+  font-size: 11px;
+  color: rgba(255,255,255,.35);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hdr-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+/* ── BUTTONS ─────────────────────────────────────────── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border: none;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  transition: all .18s;
+  white-space: nowrap;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 34px;
+}
+.btn:active { transform: scale(.97); }
+.btn-gold    { background: var(--gold); color: var(--navy); }
+.btn-gold:hover { background: var(--gold-light); }
+.btn-ghost   { background: rgba(255,255,255,.08); color: rgba(255,255,255,.65); border: 1px solid rgba(255,255,255,.12); }
+.btn-ghost:hover { background: rgba(255,255,255,.14); }
+.btn-green   { background: var(--success); color: white; }
+.btn-green:hover { background: #2ecc71; }
+.btn-danger  { background: var(--danger); color: white; }
+
+/* ── LAYOUT ──────────────────────────────────────────── */
+.app { display: flex; flex: 1; overflow: hidden; position: relative; }
+
+/* ── VIEW 1: FLOOR PLAN ──────────────────────────────── */
+#viewPlan { display: flex; flex: 1; overflow: hidden; }
+
+/* SIDEBAR */
+.sidebar {
+  width: 268px;
+  background: var(--white);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  overflow: hidden;
+}
+.sb-section {
+  padding: 14px;
+  border-bottom: 1px solid var(--border);
+}
+.sb-section h3 {
+  font-size: 10px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  color: var(--muted);
+  margin-bottom: 11px;
+}
+.sb-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+}
+
+/* Shape selector */
+.shape-row { display: flex; gap: 6px; }
+.shape-btn {
+  flex: 1;
+  padding: 8px 4px 7px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: white;
+  cursor: pointer;
+  text-align: center;
+  font-size: 10px;
+  font-family: var(--font-ui);
+  font-weight: 500;
+  color: var(--muted);
+  transition: all .18s;
+}
+.shape-btn svg { display: block; margin: 0 auto 4px; }
+.shape-btn:hover { border-color: var(--gold); color: var(--gold); }
+.shape-btn.active { border-color: var(--gold); color: var(--gold); background: #fffbef; }
+
+.field-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.field-row label { font-size: 12px; color: var(--text-mid); flex: 1; }
+.field-row input[type=number] {
+  width: 60px;
+  padding: 6px 8px;
+  border: 1.5px solid var(--border);
+  border-radius: 7px;
+  font-size: 14px;
+  font-family: var(--font-ui);
+  text-align: center;
+  color: var(--text);
+  background: white;
+}
+.field-row input[type=number]:focus { outline: none; border-color: var(--gold); }
+
+/* Guest list in sidebar */
+.guest-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 8px 8px 9px;
+  border-radius: 8px;
+  font-size: 13px;
+  cursor: grab;
+  margin-bottom: 3px;
+  border: 1.5px solid transparent;
+  transition: background .14s, border-color .14s;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.guest-item:hover { background: #f5f3ff; }
+.guest-item.assigned { background: #f0faf5; border-color: transparent; }
+.guest-item.sel-touch { border-color: var(--gold); background: #fffbef; }
+.guest-item.dragging-now { opacity: .3; }
+
+.guest-avatar {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--navy);
+  color: var(--gold-dim);
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-ui);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  letter-spacing: 0;
+}
+.guest-avatar.assigned { background: var(--success); color: white; }
+
+.guest-info { flex: 1; min-width: 0; }
+.guest-name { font-size: 13px; color: var(--text); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.guest-meta { font-size: 10px; color: var(--muted); margin-top: 1px; display: flex; gap: 5px; flex-wrap: wrap; }
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 20px;
+  font-size: 10px;
+  font-family: var(--font-ui);
+  font-weight: 500;
+}
+.badge-plus { background: #e8f5e9; color: var(--success); }
+.badge-kid  { background: #fff3e0; color: #e65100; }
+.badge-tbl  { background: var(--cream-dark); color: var(--navy); }
+
+.guest-edit-btn {
+  width: 26px; height: 26px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--muted);
+  transition: background .14s, color .14s;
+  flex-shrink: 0;
+}
+.guest-edit-btn:hover { background: var(--cream); color: var(--navy); }
+.guest-del-btn {
+  width: 24px; height: 24px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  color: #ddd;
+  display: flex; align-items: center; justify-content: center;
+  transition: color .14s;
+  flex-shrink: 0;
+}
+.guest-del-btn:hover { color: var(--danger); }
+
+/* Guest input */
+.guest-input-row { display: flex; gap: 6px; }
+.guest-input-row input {
+  flex: 1;
+  padding: 8px 11px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-family: var(--font-ui);
+  color: var(--text);
+  background: white;
+  -webkit-user-select: text; user-select: text;
+}
+.guest-input-row input:focus { outline: none; border-color: var(--gold); }
+
+/* ── ROOM ────────────────────────────────────────────── */
+.room-wrap {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+  background: #ece6d9;
+  background-image:
+    linear-gradient(rgba(0,0,0,.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+  touch-action: none;
+}
+.room-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+
+/* ── TABLE WIDGET ────────────────────────────────────── */
+.table-widget {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.table-widget.selected .table-face {
+  box-shadow: 0 0 0 3px var(--gold), var(--shadow-lg);
+}
+.table-face {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--navy);
+  padding: 10px 8px;
+  box-shadow: var(--shadow-md);
+  transition: box-shadow .18s;
+  position: relative;
+  text-align: center;
+}
+.table-face.round { border-radius: 50%; }
+.table-face.rect  { border-radius: 11px; }
+.table-face.oval  { border-radius: 50%; }
+.table-face.drop-hl { box-shadow: 0 0 0 3px var(--success), var(--shadow-md); }
+
+.tbl-num  { font-size: 10px; color: var(--gold-muted); line-height: 1; letter-spacing: .5px; margin-bottom: 1px; }
+.tbl-name { font-size: 12px; font-weight: 600; color: var(--gold-dim); white-space: nowrap; max-width: 90px; overflow: hidden; text-overflow: ellipsis; }
+.tbl-cap  { font-size: 10px; color: rgba(255,255,255,.4); margin-top: 2px; }
+.tbl-fill { font-size: 10px; margin-top: 3px; }
+.tbl-fill.f-empty { color: rgba(255,255,255,.3); }
+.tbl-fill.f-ok    { color: var(--success); }
+.tbl-fill.f-full  { color: #e74c3c; }
+
+.tbl-del {
+  position: absolute; top: -9px; right: -9px;
+  width: 22px; height: 22px;
+  background: var(--danger);
+  color: white; border-radius: 50%;
+  font-size: 14px; line-height: 22px;
+  text-align: center; cursor: pointer;
+  display: none; z-index: 10;
+  box-shadow: var(--shadow-sm);
+}
+.table-widget.selected .tbl-del { display: block; }
+
+/* ── DETAIL PANEL ────────────────────────────────────── */
+.detail-panel {
+  position: absolute;
+  right: 14px; top: 14px;
+  width: 258px;
+  background: white;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg);
+  padding: 18px;
+  z-index: 100;
+  display: none;
+  border: 1px solid var(--border);
+}
+.detail-panel.open { display: block; }
+.detail-panel h3 {
+  font-size: 11px;
+  font-family: var(--font-ui);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin-bottom: 14px;
+}
+.dp-close {
+  position: absolute; top: 12px; right: 14px;
+  width: 24px; height: 24px;
+  border: none; background: none;
+  cursor: pointer; color: var(--muted);
+  font-size: 20px; line-height: 24px; text-align: center;
+  border-radius: 6px;
+  transition: background .14s;
+}
+.dp-close:hover { background: var(--cream); color: var(--danger); }
+.dp-row { margin-bottom: 12px; }
+.dp-row label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 5px; font-family: var(--font-ui); letter-spacing: .3px; }
+.dp-row input[type=text], .dp-row input[type=number] {
+  width: 100%; padding: 7px 10px;
+  border: 1.5px solid var(--border); border-radius: 8px;
+  font-size: 13px; font-family: var(--font-ui); color: var(--text);
+  -webkit-user-select: text; user-select: text;
+}
+.dp-row input:focus { outline: none; border-color: var(--gold); }
+.dp-row-double { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+.seat-chips { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 4px; }
+.sc {
+  padding: 4px 9px; border: 1.5px solid var(--border);
+  border-radius: 20px; font-size: 11px; cursor: pointer;
+  font-family: var(--font-ui); font-weight: 500;
+  transition: all .14s;
+}
+.sc:hover { border-color: var(--navy); }
+.sc.a { background: var(--navy); color: var(--gold-dim); border-color: var(--navy); }
+
+.slot-list { min-height: 36px; border: 1.5px dashed var(--border); border-radius: 8px; padding: 5px; }
+.slot-row {
+  display: flex; align-items: center;
+  gap: 6px; padding: 4px 6px;
+  font-size: 12px; border-radius: 5px;
+  font-family: var(--font-ui);
+}
+.slot-row:hover { background: var(--cream); }
+.slot-row .sl-rm {
+  margin-left: auto; color: #ccc; cursor: pointer;
+  font-size: 15px; line-height: 1; flex-shrink: 0;
+  border: none; background: none;
+}
+.slot-row .sl-rm:hover { color: var(--danger); }
+.slot-empty { font-size: 11px; color: var(--muted); text-align: center; padding: 10px 0; font-family: var(--font-ui); }
+
+/* ── FLOATING DRAG CLONE ─────────────────────────────── */
+#drag-ghost {
+  position: fixed; z-index: 9000; pointer-events: none;
+  background: white; border: 2px solid var(--gold);
+  border-radius: 10px; padding: 8px 14px;
+  box-shadow: var(--shadow-lg);
+  font-size: 13px; font-family: var(--font-ui);
+  display: none; align-items: center; gap: 8px;
+  max-width: 200px;
+}
+
+/* ── VIEW 2: GUEST LIST ──────────────────────────────── */
+#viewGuests {
+  display: none;
+  flex: 1;
+  flex-direction: column;
+  overflow: hidden;
+  background: var(--cream);
+}
+#viewGuests.show { display: flex; }
+
+.gl-toolbar {
+  background: white;
+  border-bottom: 1px solid var(--border);
+  padding: 12px 20px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.gl-search-wrap {
+  flex: 1;
+  position: relative;
+  max-width: 360px;
+}
+.gl-search-wrap svg {
+  position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+  color: var(--muted); pointer-events: none;
+}
+.gl-search {
+  width: 100%;
+  padding: 9px 12px 9px 36px;
+  border: 1.5px solid var(--border);
+  border-radius: 9px;
+  font-size: 14px;
+  font-family: var(--font-ui);
+  background: var(--cream);
+  color: var(--text);
+  -webkit-user-select: text; user-select: text;
+}
+.gl-search:focus { outline: none; border-color: var(--gold); background: white; }
+
+.gl-sort-toggle {
+  display: flex;
+  background: var(--cream-dark);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+.gl-sort-btn {
+  padding: 5px 12px;
+  border: none; border-radius: 6px;
+  cursor: pointer; font-size: 11px; font-family: var(--font-ui); font-weight: 500;
+  color: var(--muted); background: transparent;
+  transition: all .18s;
+}
+.gl-sort-btn.active { background: white; color: var(--navy); box-shadow: var(--shadow-sm); }
+
+.gl-summary {
+  padding: 8px 20px;
+  font-size: 11px; color: var(--muted);
+  font-family: var(--font-ui);
+  flex-shrink: 0;
+}
+
+.gl-body { flex: 1; overflow-y: auto; padding: 0 16px 16px; }
+
+/* Table group header */
+.gl-group-hdr {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 4px 8px;
+  position: sticky; top: 0;
+  background: var(--cream);
+  z-index: 10;
+}
+.gl-group-num {
+  width: 32px; height: 32px;
+  background: var(--navy); color: var(--gold-dim);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; font-family: var(--font-ui);
+  flex-shrink: 0;
+}
+.gl-group-name { font-size: 14px; font-weight: 600; color: var(--text); font-family: var(--font-ui); }
+.gl-group-meta { font-size: 11px; color: var(--muted); font-family: var(--font-ui); }
+.gl-group-line { flex: 1; height: 1px; background: var(--border); }
+
+/* Guest row in view 2 */
+.gl-card {
+  background: white;
+  border-radius: 10px;
+  padding: 11px 14px;
+  margin-bottom: 5px;
+  display: flex; align-items: center; gap: 10px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: box-shadow .14s, border-color .14s;
+}
+.gl-card:hover { box-shadow: var(--shadow-md); border-color: var(--gold); }
+.gl-card-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--navy); color: var(--gold-dim);
+  font-size: 12px; font-weight: 600; font-family: var(--font-ui);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.gl-card-avatar.ok { background: var(--success); color: white; }
+.gl-card-avatar.unassigned { background: var(--cream-dark); color: var(--muted); }
+.gl-card-info { flex: 1; min-width: 0; }
+.gl-card-name { font-size: 14px; font-weight: 500; color: var(--text); font-family: var(--font-ui); }
+.gl-card-sub  { font-size: 11px; color: var(--muted); margin-top: 2px; display: flex; gap: 6px; flex-wrap: wrap; font-family: var(--font-ui); }
+.gl-card-tbl {
+  text-align: right;
+  flex-shrink: 0;
+}
+.gl-card-tbl-num {
+  font-size: 18px; font-weight: 700; color: var(--navy);
+  font-family: var(--font-display);
+  line-height: 1;
+}
+.gl-card-tbl-name {
+  font-size: 10px; color: var(--muted);
+  max-width: 90px; text-align: right;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-family: var(--font-ui);
+}
+.gl-unassigned-hdr {
+  padding: 14px 4px 8px;
+  font-size: 11px; font-family: var(--font-ui);
+  font-weight: 600; text-transform: uppercase;
+  letter-spacing: 1px; color: var(--muted);
+  display: flex; align-items: center; gap: 8px;
+}
+.gl-unassigned-hdr::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* ── MODAL (guest edit) ──────────────────────────────── */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.45);
+  z-index: 500;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: white;
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  width: 100%; max-width: 360px;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(12px);
+  transition: transform .22s;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal h2 {
+  font-family: var(--font-display);
+  font-size: 20px; font-weight: 600;
+  color: var(--navy); margin-bottom: 18px;
+}
+.modal-close {
+  position: absolute; top: 14px; right: 16px;
+  width: 28px; height: 28px;
+  border: none; background: none;
+  cursor: pointer; font-size: 20px; color: var(--muted);
+  border-radius: 6px;
+  transition: background .14s;
+}
+.modal-close:hover { background: var(--cream); color: var(--danger); }
+.modal-row { margin-bottom: 14px; position: relative; }
+.modal-row label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 5px; font-family: var(--font-ui); font-weight: 500; letter-spacing: .3px; }
+.modal-row input[type=text] {
+  width: 100%; padding: 9px 12px;
+  border: 1.5px solid var(--border); border-radius: 9px;
+  font-size: 14px; font-family: var(--font-ui); color: var(--text);
+  -webkit-user-select: text; user-select: text;
+}
+.modal-row input[type=text]:focus { outline: none; border-color: var(--gold); }
+.toggle-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--border); border-radius: 9px;
+  cursor: pointer;
+  transition: background .14s;
+  margin-bottom: 0;
+}
+.toggle-row:hover { background: var(--cream); }
+.toggle-row label { margin: 0; cursor: pointer; flex: 1; font-size: 13px; color: var(--text); }
+.toggle-track {
+  width: 40px; height: 22px;
+  border-radius: 11px; background: var(--border);
+  position: relative; transition: background .2s;
+  flex-shrink: 0;
+}
+.toggle-track.on { background: var(--success); }
+.toggle-thumb {
+  position: absolute; top: 3px; left: 3px;
+  width: 16px; height: 16px;
+  border-radius: 50%; background: white;
+  box-shadow: var(--shadow-sm);
+  transition: left .2s;
+}
+.toggle-track.on .toggle-thumb { left: 21px; }
+
+.child-stepper {
+  display: flex; align-items: center; gap: 0;
+  border: 1.5px solid var(--border); border-radius: 9px;
+  overflow: hidden;
+}
+.step-btn {
+  width: 40px; height: 40px;
+  border: none; background: var(--cream);
+  font-size: 18px; cursor: pointer; color: var(--navy);
+  display: flex; align-items: center; justify-content: center;
+  transition: background .14s;
+  flex-shrink: 0;
+}
+.step-btn:hover { background: var(--cream-dark); }
+.step-val {
+  flex: 1; text-align: center;
+  font-size: 18px; font-family: var(--font-ui);
+  font-weight: 600; color: var(--text);
+  background: white;
+  padding: 8px 0;
+  border: none; outline: none;
+}
+.modal-footer { display: flex; gap: 8px; margin-top: 20px; }
+.modal-footer .btn { flex: 1; justify-content: center; padding: 10px; font-size: 13px; }
+
+/* ── TOAST ───────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 24px; left: 50%;
+  transform: translateX(-50%);
+  background: var(--navy);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-family: var(--font-ui);
+  opacity: 0; pointer-events: none;
+  transition: opacity .2s;
+  z-index: 9999;
+  box-shadow: var(--shadow-md);
+  white-space: nowrap;
+  border: 1px solid rgba(201,168,76,.3);
+}
+.toast.show { opacity: 1; }
+
+/* ── LEGEND ──────────────────────────────────────────── */
+.room-legend {
+  position: absolute; bottom: 12px; left: 12px;
+  font-size: 10px; color: var(--muted);
+  background: rgba(255,255,255,.85);
+  padding: 6px 10px; border-radius: 8px;
+  font-family: var(--font-ui);
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+}
+
+/* ── SCROLLBAR ───────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-mid); border-radius: 3px; }
+
+/* ── LOCK MODE ───────────────────────────────────────── */
+.btn-lock   { background: rgba(255,255,255,.1); color: rgba(255,255,255,.7); border: 1px solid rgba(255,255,255,.18); }
+.btn-lock:hover { background: rgba(255,255,255,.18); }
+.btn-unlock { background: var(--gold); color: var(--navy); }
+.btn-unlock:hover { background: var(--gold-light); }
+
+body.locked header .view-toggle,
+body.locked .hdr-actions .btn-green,
+body.locked .hdr-actions .btn-ghost { display: none; }
+body.locked header { justify-content: space-between; }
+body.locked .hdr-center { gap: 6px; }
+body.locked .hdr-stats { font-size: 13px; color: var(--gold-dim); font-weight: 500; }
+
+.gl-check-btn {
+  width: 44px; height: 44px;
+  border-radius: 50%;
+  border: 2.5px solid var(--border-mid);
+  background: white;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+  transition: all .18s;
+  -webkit-tap-highlight-color: transparent;
+}
+.gl-check-btn:hover { border-color: var(--success); }
+.gl-check-btn.checked { background: var(--success); border-color: var(--success); }
+.gl-check-btn svg { display: none; }
+.gl-check-btn.checked svg { display: block; }
+
+.gl-card.arrived {
+  background: #f0faf5;
+  border-color: #b2dfcc;
+}
+.gl-card.arrived .gl-card-name { color: var(--text-mid); }
+.gl-card.arrived .gl-card-avatar.ok { background: var(--success); }
+
+body.locked .gl-card { cursor: pointer; }
+body.locked .gl-toolbar .gl-sort-toggle { display: none; }
+
+/* ── PRINT ───────────────────────────────────────────── */
+@media print {
+  body { overflow: visible; height: auto; background: white; }
+  header, .sidebar, .detail-panel, .room-legend, #drag-ghost, .modal-overlay, #viewGuests { display: none !important; }
+  #viewPlan { height: auto; overflow: visible; }
+  .room-wrap { overflow: visible; height: 90vh; }
+  .room-canvas { position: relative; }
+  .tbl-del { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══ HEADER ════════════════════════════════════════════ -->
+<header>
+  <div class="hdr-brand">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+    </svg>
+    <h1>Raspored Sedenja</h1>
+  </div>
+
+  <div class="hdr-center">
+    <div class="view-toggle">
+      <button class="view-btn active" id="btnViewPlan" onclick="switchView('plan')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Plan
+      </button>
+      <button class="view-btn" id="btnViewGuests" onclick="switchView('guests')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3" cy="6" r="1.5"/><circle cx="3" cy="12" r="1.5"/><circle cx="3" cy="18" r="1.5"/></svg>
+        Spisak gostiju
+      </button>
+    </div>
+    <span class="hdr-stats" id="hdrStats">0/0 raspoređeno</span>
+  </div>
+
+  <div class="hdr-actions">
+    <button class="btn btn-green" onclick="shareLink()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      Podeli
+    </button>
+    <button class="btn btn-ghost" onclick="exportPlan()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Sačuvaj
+    </button>
+    <label class="btn btn-ghost" style="cursor:pointer">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Učitaj
+      <input type="file" accept=".json" style="display:none" onchange="importPlan(this)">
+    </label>
+    <button class="btn btn-ghost" onclick="window.print()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+      Štampaj
+    </button>
+    <button class="btn btn-lock" id="lockBtn" onclick="toggleLock()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      Zaključaj
+    </button>
+  </div>
+</header>
+
+<!-- ══ APP ════════════════════════════════════════════════ -->
+<div class="app">
+
+  <!-- VIEW 1: FLOOR PLAN -->
+  <div id="viewPlan">
+
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+
+      <div class="sb-section">
+        <h3>Dodaj Sto</h3>
+        <div class="shape-row">
+          <div class="shape-btn active" id="shpRound" onclick="selShape('round')">
+            <svg width="28" height="28" viewBox="0 0 32 32"><circle cx="16" cy="16" r="11" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            Okrugli
+          </div>
+          <div class="shape-btn" id="shpRect" onclick="selShape('rect')">
+            <svg width="28" height="28" viewBox="0 0 32 32"><rect x="4" y="9" width="24" height="14" rx="3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            Pravougaoni
+          </div>
+          <div class="shape-btn" id="shpOval" onclick="selShape('oval')">
+            <svg width="28" height="28" viewBox="0 0 32 32"><ellipse cx="16" cy="16" rx="13" ry="8" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            Ovalni
+          </div>
+        </div>
+        <div class="field-row">
+          <label>Mesta za stolom</label>
+          <input type="number" id="newSeats" value="8" min="1" max="40">
+        </div>
+        <button class="btn btn-gold" style="width:100%;justify-content:center;margin-top:10px" onclick="addTable()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Dodaj Sto
+        </button>
+      </div>
+
+      <div class="sb-section">
+        <h3>Lista Gostiju</h3>
+        <div class="guest-input-row">
+          <input type="text" id="guestInput" placeholder="Ime i prezime…" onkeydown="if(event.key==='Enter')addGuest()">
+          <button class="btn btn-gold" onclick="addGuest()" style="padding:8px 12px;min-height:38px">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          </button>
+        </div>
+        <div style="margin-top:6px;font-size:10px;color:var(--muted);font-family:var(--font-ui)">
+          Prevuci na sto · tapni pa tapni sto (tablet)
+        </div>
+      </div>
+
+      <div class="sb-scroll" id="sidebarGuests"></div>
+
+    </div><!-- /sidebar -->
+
+    <!-- ROOM -->
+    <div class="room-wrap" id="roomWrap">
+      <div class="room-canvas" id="roomCanvas" onclick="handleRoomClick(event)"></div>
+
+      <!-- DETAIL PANEL -->
+      <div class="detail-panel" id="detailPanel">
+        <button class="dp-close" onclick="closePanel()">×</button>
+        <h3>Sto</h3>
+        <div class="dp-row-double">
+          <div>
+            <label>Broj stola</label>
+            <input type="number" id="dpNum" min="1" max="99" oninput="updTbl('number', parseInt(this.value)||null)" placeholder="—">
+          </div>
+          <div>
+            <label>Kapacitet</label>
+            <input type="number" id="dpSeats" min="1" max="60" oninput="updTbl('seats', parseInt(this.value)||1)">
+          </div>
+        </div>
+        <div class="dp-row">
+          <label>Naziv (opcionalno)</label>
+          <input type="text" id="dpName" oninput="updTbl('name', this.value)" placeholder="npr. Porodica">
+        </div>
+        <div class="dp-row">
+          <label>Brzi kapacitet</label>
+          <div class="seat-chips" id="dpChips"></div>
+        </div>
+        <div class="dp-row">
+          <label id="dpSlotsLabel">Gosti (0/8)</label>
+          <div class="slot-list" id="dpSlots"></div>
+        </div>
+      </div>
+
+      <div class="room-legend">Klikni sto za detalje · Prevuci da pomeriš</div>
+    </div>
+
+  </div><!-- /viewPlan -->
+
+  <!-- VIEW 2: GUEST LIST -->
+  <div id="viewGuests">
+    <div class="gl-toolbar">
+      <div class="gl-search-wrap">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input class="gl-search" id="glSearch" type="search" placeholder="Pretraži po imenu…" oninput="renderGuestView()">
+      </div>
+      <div class="gl-sort-toggle">
+        <button class="gl-sort-btn active" id="sortAlpha" onclick="setSort('alpha')">A–Z</button>
+        <button class="gl-sort-btn" id="sortTable" onclick="setSort('table')">Po stolu</button>
+      </div>
+      <button class="btn btn-ghost" style="color:var(--text-mid);border-color:var(--border)" onclick="clearAllBtn()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+        Obriši sve
+      </button>
+    </div>
+    <div class="gl-summary" id="glSummary"></div>
+    <div class="gl-body" id="glBody"></div>
+  </div>
+
+</div><!-- /app -->
+
+<!-- ══ GUEST EDIT MODAL ════════════════════════════════════ -->
+<div class="modal-overlay" id="guestModal" onclick="closeModal(event)">
+  <div class="modal" style="position:relative">
+    <button class="modal-close" onclick="closeGuestModal()">×</button>
+    <h2 id="modalTitle">Gost</h2>
+
+    <div class="modal-row">
+      <label>IME I PREZIME</label>
+      <input type="text" id="mName" placeholder="Marko Jović">
+    </div>
+
+    <div class="modal-row" style="margin-bottom:8px">
+      <div class="toggle-row" onclick="togglePlusOne()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+        <label>Dolazi sa pratiocem (+1)</label>
+        <div class="toggle-track" id="plusOneTrack"><div class="toggle-thumb"></div></div>
+      </div>
+    </div>
+
+    <div class="modal-row" id="plusOneNameRow" style="display:none">
+      <label>IME PRATIOCA</label>
+      <input type="text" id="mPlusName" placeholder="Ime pratioca (opcionalno)">
+    </div>
+
+    <div class="modal-row">
+      <label>DECA</label>
+      <div class="child-stepper">
+        <button class="step-btn" onclick="stepChild(-1)">−</button>
+        <div class="step-val" id="childVal">0</div>
+        <button class="step-btn" onclick="stepChild(1)">+</button>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn" style="background:var(--cream);color:var(--text-mid);flex:0 0 auto;padding:10px 16px" onclick="closeGuestModal()">Otkaži</button>
+      <button class="btn btn-gold" onclick="saveGuestModal()">Sačuvaj</button>
+      <button class="btn btn-danger" style="flex:0 0 auto;padding:10px 14px" onclick="deleteGuestModal()" title="Izbriši gosta">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="drag-ghost"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ══ STATE ═══════════════════════════════════════════════
+let tables  = [];
+let guests  = [];
+let nextTid = 1;
+let nextGid = 1;
+let selTbl  = null;   // selected table id
+let curShape = 'round';
+let touchSelGid = null;  // tap-selected guest id
+let gDragId = null;      // pointer-dragged guest id
+let glSort  = 'alpha';   // 'alpha' | 'table'
+let editGid = null;      // guest being edited in modal
+let isLocked = false;
+
+const STORAGE = 'vencanje-v2';
+
+// ══ PERSISTENCE ═════════════════════════════════════════
+function save() {
+  try { localStorage.setItem(STORAGE, JSON.stringify({tables,guests,nextTid,nextGid,isLocked})); } catch(e){}
+}
+let saveTimer;
+function qSave() { clearTimeout(saveTimer); saveTimer = setTimeout(save, 700); }
+
+function normGuests(gs) {
+  return (gs||[]).map(g=>({arrived:false, ...g}));
+}
+
+function loadLocal() {
+  try {
+    const d = JSON.parse(localStorage.getItem(STORAGE));
+    if (!d) return false;
+    ({tables,nextTid,nextGid} = d);
+    guests = normGuests(d.guests);
+    isLocked = d.isLocked || false;
+    return true;
+  } catch(e) { return false; }
+}
+
+function loadHash() {
+  const h = location.hash;
+  if (!h.startsWith('#plan=')) return false;
+  try {
+    const d = JSON.parse(decodeURIComponent(atob(h.slice(6))));
+    ({tables,nextTid,nextGid} = d);
+    guests = normGuests(d.guests);
+    isLocked = d.isLocked || false;
+    history.replaceState(null,'',location.pathname);
+    return true;
+  } catch(e) { return false; }
+}
+
+// ══ EXPORT / IMPORT ═════════════════════════════════════
+function exportPlan() {
+  const blob = new Blob([JSON.stringify({tables,guests,nextTid,nextGid},null,2)],{type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'vencanje-raspored.json';
+  a.click();
+  toast('Fajl sačuvan');
+}
+function importPlan(inp) {
+  const f = inp.files[0]; if(!f) return;
+  const r = new FileReader();
+  r.onload = e => {
+    try {
+      const d = JSON.parse(e.target.result);
+      ({tables,guests,nextTid,nextGid} = d);
+      rebuildDOM(); save(); toast('Plan učitan ✓');
+    } catch{ toast('Greška — nije validan fajl'); }
+  };
+  r.readAsText(f); inp.value='';
+}
+function shareLink() {
+  try {
+    const enc = btoa(encodeURIComponent(JSON.stringify({tables,guests,nextTid,nextGid})));
+    const url = location.origin + location.pathname + '#plan=' + enc;
+    navigator.clipboard.writeText(url)
+      .then(()=>toast('Link kopiran! Pošalji na tablet 🔗'))
+      .catch(()=>prompt('Kopiraj link:',url));
+  } catch{ toast('Greška pri generisanju linka'); }
+}
+
+// ══ VIEWS ═══════════════════════════════════════════════
+let currentView = 'plan';
+function switchView(v) {
+  currentView = v;
+  document.getElementById('viewPlan').style.display = v==='plan' ? 'flex' : 'none';
+  const vg = document.getElementById('viewGuests');
+  vg.style.display = v==='guests' ? 'flex' : 'none';
+  document.getElementById('btnViewPlan').classList.toggle('active', v==='plan');
+  document.getElementById('btnViewGuests').classList.toggle('active', v==='guests');
+  if (v==='guests') renderGuestView();
+}
+function setSort(s) {
+  glSort = s;
+  document.getElementById('sortAlpha').classList.toggle('active', s==='alpha');
+  document.getElementById('sortTable').classList.toggle('active', s==='table');
+  renderGuestView();
+}
+
+// ══ SHAPE ════════════════════════════════════════════════
+function selShape(s) {
+  curShape = s;
+  ['round','rect','oval'].forEach(x => {
+    document.getElementById('shp'+x.charAt(0).toUpperCase()+x.slice(1)).classList.toggle('active',x===s);
+  });
+}
+function dims(shape) {
+  if (shape==='round') return {w:115,h:115};
+  if (shape==='rect')  return {w:165,h:100};
+  if (shape==='oval')  return {w:170,h:110};
+  return {w:120,h:120};
+}
+
+// ══ TABLES ══════════════════════════════════════════════
+function addTable() {
+  const seats = parseInt(document.getElementById('newSeats').value)||8;
+  const wrap  = document.getElementById('roomWrap');
+  const d     = dims(selShape);
+  const col   = tables.length % 4;
+  const row   = Math.floor(tables.length/4);
+  const t = {
+    id: nextTid++,
+    number: tables.length+1,
+    name: '',
+    seats,
+    shape: curShape,
+    guests: [],
+    x: Math.min(60+col*200, wrap.offsetWidth -d.w-20),
+    y: Math.min(60+row*185, wrap.offsetHeight-d.h-20),
+  };
+  tables.push(t);
+  renderTable(t);
+  updateStats(); qSave();
+}
+
+function tblSeatsUsed(t) {
+  return t.guests.reduce((s,gid)=>{
+    const g=guests.find(x=>x.id===gid);
+    return s+(g?gSeatCount(g):0);
+  },0);
+}
+function gSeatCount(g) {
+  return 1+(g.plusOne?1:0)+(g.children||0);
+}
+
+function renderTable(t) {
+  const d = dims(t.shape);
+  let el = document.getElementById('tbl-'+t.id);
+  if (!el) {
+    el = document.createElement('div');
+    el.className = 'table-widget';
+    el.id = 'tbl-'+t.id;
+    el.style.width  = d.w+'px';
+    el.style.height = d.h+'px';
+    document.getElementById('roomCanvas').appendChild(el);
+    makeTblDrag(el,t);
+    el.addEventListener('click', e => { e.stopPropagation(); onTblClick(t.id); });
+  }
+  el.style.left = t.x+'px';
+  el.style.top  = t.y+'px';
+  el.classList.toggle('selected', t.id===selTbl);
+
+  const used  = tblSeatsUsed(t);
+  const pct   = t.seats>0 ? used/t.seats : 0;
+  const fcls  = used===0 ? 'f-empty' : pct>=1 ? 'f-full' : 'f-ok';
+  const ftxt  = used===0 ? 'Prazno' : pct>=1 ? '🔴 Puno' : `${used}/${t.seats} os.`;
+  const label = t.number ? `#${t.number}` : '';
+  const name  = t.name||'Sto';
+
+  el.innerHTML=`
+    <div class="table-face ${t.shape}" style="width:${d.w}px;height:${d.h}px">
+      ${label?`<div class="tbl-num">${label}</div>`:''}
+      <div class="tbl-name">${esc(name)}</div>
+      <div class="tbl-cap">${t.seats} mesta</div>
+      <div class="tbl-fill ${fcls}">${ftxt}</div>
+      <div class="tbl-del" onclick="delTable(${t.id},event)">×</div>
+    </div>`;
+}
+
+function rerender(id) { const t=tables.find(x=>x.id===id); if(t) renderTable(t); }
+
+function makeTblDrag(el,t) {
+  let ox,oy,moved=false,pid=null;
+  el.addEventListener('pointerdown', e=>{
+    if(e.target.classList.contains('tbl-del')) return;
+    if(pid!==null) return;
+    e.preventDefault(); e.stopPropagation();
+    pid=e.pointerId; el.setPointerCapture(e.pointerId);
+    const r=el.parentElement.getBoundingClientRect();
+    ox=e.clientX-r.left-t.x; oy=e.clientY-r.top-t.y; moved=false;
+  });
+  el.addEventListener('pointermove', e=>{
+    if(e.pointerId!==pid) return;
+    e.preventDefault();
+    const wrap=document.getElementById('roomWrap');
+    const r=el.parentElement.getBoundingClientRect();
+    const d=dims(t.shape);
+    t.x=Math.max(0,Math.min(e.clientX-r.left-ox, wrap.offsetWidth -d.w));
+    t.y=Math.max(0,Math.min(e.clientY-r.top -oy, wrap.offsetHeight-d.h));
+    el.style.left=t.x+'px'; el.style.top=t.y+'px'; moved=true;
+  });
+  el.addEventListener('pointerup', e=>{
+    if(e.pointerId!==pid) return; pid=null;
+    if(moved) qSave();
+  });
+  el.addEventListener('pointercancel',()=>{pid=null;});
+}
+
+function onTblClick(id) {
+  if(touchSelGid!==null){ assignGuest(touchSelGid,id); clearTouch(); return; }
+  selTbl=id;
+  tables.forEach(t=>{ if(t.id!==id) rerender(t.id); });
+  rerender(id);
+  openPanel(id);
+}
+
+function delTable(id,e) {
+  e&&e.stopPropagation();
+  const t=tables.find(x=>x.id===id); if(!t) return;
+  t.guests.forEach(gid=>{ const g=guests.find(x=>x.id===gid); if(g) g.tableId=null; });
+  tables=tables.filter(x=>x.id!==id);
+  document.getElementById('tbl-'+id)?.remove();
+  if(selTbl===id){ selTbl=null; closePanel(); }
+  renderSidebar(); updateStats(); qSave();
+}
+
+function clearAllBtn() {
+  if(!confirm('Obrisati sve stolove?')) return;
+  clearAll();
+}
+function clearAll() {
+  tables.forEach(t=>t.guests.forEach(gid=>{ const g=guests.find(x=>x.id===gid); if(g) g.tableId=null; }));
+  tables=[];
+  document.getElementById('roomCanvas').innerHTML='';
+  selTbl=null; closePanel(); renderSidebar(); updateStats(); qSave();
+}
+
+function handleRoomClick(e) {
+  if(e.target===document.getElementById('roomCanvas')||e.target===document.getElementById('roomWrap')){
+    clearTouch(); selTbl=null; tables.forEach(t=>rerender(t.id)); closePanel();
+  }
+}
+
+// ══ DETAIL PANEL ════════════════════════════════════════
+function openPanel(id) {
+  const t=tables.find(x=>x.id===id); if(!t) return;
+  document.getElementById('detailPanel').classList.add('open');
+  document.getElementById('dpNum').value  = t.number||'';
+  document.getElementById('dpName').value = t.name||'';
+  document.getElementById('dpSeats').value= t.seats;
+  renderDpChips(t); renderDpSlots(t);
+}
+function closePanel() { document.getElementById('detailPanel').classList.remove('open'); }
+function refreshPanel() { if(selTbl) openPanel(selTbl); }
+
+function updTbl(key,val) {
+  const t=tables.find(x=>x.id===selTbl); if(!t) return;
+  t[key]=val;
+  rerender(selTbl); renderSidebar(); updateStats(); qSave();
+  if(key==='seats'){ renderDpChips(t); renderDpSlots(t); }
+}
+
+function renderDpChips(t) {
+  const opts=[2,4,6,8,10,12,16,20];
+  document.getElementById('dpChips').innerHTML=opts.map(n=>
+    `<div class="sc ${t.seats===n?'a':''}" onclick="setSeats(${n})">${n}</div>`
+  ).join('');
+}
+function setSeats(n) {
+  const t=tables.find(x=>x.id===selTbl); if(!t) return;
+  t.seats=n;
+  document.getElementById('dpSeats').value=n;
+  renderDpChips(t); renderDpSlots(t);
+  rerender(selTbl); updateStats(); qSave();
+}
+function renderDpSlots(t) {
+  const used=tblSeatsUsed(t);
+  document.getElementById('dpSlotsLabel').textContent=`Gosti (${used}/${t.seats} mest)`;
+  const c=document.getElementById('dpSlots');
+  if(!t.guests.length){ c.innerHTML=`<div class="slot-empty">Prevuci goste ili tapni gosta→sto</div>`; return; }
+  c.innerHTML=t.guests.map(gid=>{
+    const g=guests.find(x=>x.id===gid);
+    if(!g) return '';
+    const sub=[];
+    if(g.plusOne) sub.push('+1'+(g.plusOneName?' ('+g.plusOneName+')':''));
+    if(g.children) sub.push(`${g.children} dete${g.children>1?'ce':''}`);
+    return `<div class="slot-row">
+      <span style="font-size:16px">👤</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:12px;font-weight:500">${esc(g.name)}</div>
+        ${sub.length?`<div style="font-size:10px;color:var(--muted)">${sub.join(' · ')}</div>`:''}
+      </div>
+      <button class="sl-rm" onclick="removeFromTbl(${g.id})">×</button>
+    </div>`;
+  }).join('');
+}
+
+// ══ GUESTS ══════════════════════════════════════════════
+function addGuest() {
+  const inp=document.getElementById('guestInput');
+  const name=inp.value.trim(); if(!name) return;
+  guests.push({id:nextGid++,name,plusOne:false,plusOneName:'',children:0,tableId:null,arrived:false});
+  inp.value='';
+  renderSidebar(); updateStats(); qSave();
+  inp.focus();
+}
+
+function renderSidebar() {
+  const c=document.getElementById('sidebarGuests');
+  if(!guests.length){
+    c.innerHTML='<div style="font-size:12px;color:var(--muted);padding:14px;text-align:center;font-family:var(--font-ui)">Dodaj goste iz panela iznad</div>';
+    return;
+  }
+  c.innerHTML=guests.map(g=>{
+    const t=g.tableId?tables.find(x=>x.id===g.tableId):null;
+    const init=(g.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const isSel=touchSelGid===g.id;
+    const sub=[];
+    if(g.plusOne) sub.push(`<span class="badge badge-plus">+1${g.plusOneName?' — '+g.plusOneName:''}</span>`);
+    if(g.children) sub.push(`<span class="badge badge-kid">${g.children}👶</span>`);
+    if(t) sub.push(`<span class="badge badge-tbl">${t.number?'#'+t.number+' ':''}${t.name||'Sto'}</span>`);
+    return `<div class="guest-item ${g.tableId?'assigned':''} ${isSel?'sel-touch':''}"
+      id="gi-${g.id}" data-gid="${g.id}">
+      <div class="guest-avatar ${g.tableId?'assigned':''}">${init}</div>
+      <div class="guest-info">
+        <div class="guest-name">${esc(g.name)}</div>
+        ${sub.length?`<div class="guest-meta">${sub.join('')}</div>`:''}
+      </div>
+      <button class="guest-edit-btn" onclick="event.stopPropagation();openGuestModal(${g.id})" title="Uredi">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </button>
+      <button class="guest-del-btn" onclick="event.stopPropagation();delGuest(${g.id})" title="Izbriši">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>`;
+  }).join('');
+  guests.forEach(g=>{ const el=document.getElementById('gi-'+g.id); if(el) attachGuestDrag(el,g.id); });
+}
+
+function delGuest(id) {
+  const g=guests.find(x=>x.id===id); if(!g) return;
+  if(g.tableId){
+    const t=tables.find(x=>x.id===g.tableId);
+    if(t) t.guests=t.guests.filter(x=>x!==id);
+    rerender(g.tableId);
+    if(selTbl===g.tableId) refreshPanel();
+  }
+  guests=guests.filter(x=>x.id!==id);
+  if(touchSelGid===id) clearTouch();
+  renderSidebar(); updateStats(); qSave();
+}
+
+// ══ GUEST POINTER DRAG ══════════════════════════════════
+const ghost=document.getElementById('drag-ghost');
+function attachGuestDrag(el,gid) {
+  let pid=null, sx,sy, dragging=false;
+  const THRESH=7;
+  el.addEventListener('pointerdown',e=>{
+    if(e.target.closest('.guest-edit-btn')||e.target.closest('.guest-del-btn')) return;
+    if(pid!==null) return;
+    e.preventDefault();
+    pid=e.pointerId; sx=e.clientX; sy=e.clientY; dragging=false;
+    el.setPointerCapture(e.pointerId);
+  });
+  el.addEventListener('pointermove',e=>{
+    if(e.pointerId!==pid) return;
+    if(!dragging&&(Math.abs(e.clientX-sx)>THRESH||Math.abs(e.clientY-sy)>THRESH)){
+      dragging=true; gDragId=gid;
+      el.classList.add('dragging-now');
+      const g=guests.find(x=>x.id===gid);
+      ghost.style.display='flex';
+      ghost.innerHTML=`<div class="guest-avatar" style="width:22px;height:22px;font-size:10px">${(g?.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}</div>${esc(g?.name||'')}`;
+      clearTouch();
+    }
+    if(dragging){
+      ghost.style.left=(e.clientX-20)+'px'; ghost.style.top=(e.clientY-20)+'px';
+      hlTblAt(e.clientX,e.clientY);
+    }
+  });
+  el.addEventListener('pointerup',e=>{
+    if(e.pointerId!==pid) return; pid=null;
+    if(dragging){
+      ghost.style.display='none'; clearHl();
+      el.classList.remove('dragging-now');
+      const tw=tblAt(e.clientX,e.clientY);
+      if(tw){ const tid=parseInt(tw.id.replace('tbl-','')); assignGuest(gDragId,tid); }
+      gDragId=null; dragging=false;
+    } else {
+      onGuestTap(gid);
+    }
+  });
+  el.addEventListener('pointercancel',e=>{
+    if(e.pointerId!==pid) return; pid=null;
+    ghost.style.display='none'; clearHl();
+    el.classList.remove('dragging-now');
+    gDragId=null; dragging=false;
+  });
+}
+
+function tblAt(x,y){ return document.elementsFromPoint(x,y).find(el=>el.classList.contains('table-widget'))||null; }
+function hlTblAt(x,y){ clearHl(); const tw=tblAt(x,y); if(tw) tw.querySelector('.table-face')?.classList.add('drop-hl'); }
+function clearHl(){ document.querySelectorAll('.table-face.drop-hl').forEach(el=>el.classList.remove('drop-hl')); }
+
+function onGuestTap(gid) {
+  touchSelGid = touchSelGid===gid ? null : gid;
+  renderSidebar();
+  if(touchSelGid!==null) toast('Tapni sto da dodeliš gosta');
+}
+function clearTouch(){ touchSelGid=null; renderSidebar(); }
+
+function assignGuest(gid,tid) {
+  const g=guests.find(x=>x.id===gid);
+  const t=tables.find(x=>x.id===tid);
+  if(!g||!t) return;
+  if(g.tableId===tid) return;
+  const needed=gSeatCount(g);
+  const free=t.seats-tblSeatsUsed(t);
+  if(free<needed){ toast(`Nema mesta! Potrebno ${needed}, slobodno ${free}`); return; }
+  if(g.tableId){
+    const old=tables.find(x=>x.id===g.tableId);
+    if(old){ old.guests=old.guests.filter(x=>x!==gid); rerender(old.id); }
+  }
+  g.tableId=tid;
+  if(!t.guests.includes(gid)) t.guests.push(gid);
+  rerender(tid); renderSidebar(); updateStats();
+  if(selTbl===tid) refreshPanel();
+  if(currentView==='guests') renderGuestView();
+  toast(`${g.name} → ${t.number?'#'+t.number+' ':''}${t.name||'Sto'}`);
+  qSave();
+}
+
+function removeFromTbl(gid) {
+  const g=guests.find(x=>x.id===gid); if(!g||!g.tableId) return;
+  const t=tables.find(x=>x.id===g.tableId);
+  if(t){ t.guests=t.guests.filter(x=>x!==gid); rerender(t.id); }
+  g.tableId=null;
+  renderSidebar(); refreshPanel(); updateStats(); qSave();
+}
+
+// ══ GUEST MODAL ═════════════════════════════════════════
+let modalPlusOne=false, modalChildren=0;
+
+function openGuestModal(id) {
+  editGid=id;
+  const g=guests.find(x=>x.id===id); if(!g) return;
+  document.getElementById('modalTitle').textContent = g.name||'Gost';
+  document.getElementById('mName').value    = g.name||'';
+  document.getElementById('mPlusName').value= g.plusOneName||'';
+  modalPlusOne   = g.plusOne||false;
+  modalChildren  = g.children||0;
+  updatePlusOneUI();
+  document.getElementById('childVal').textContent=modalChildren;
+  document.getElementById('guestModal').classList.add('open');
+}
+
+function closeGuestModal() {
+  editGid=null;
+  document.getElementById('guestModal').classList.remove('open');
+}
+function closeModal(e){
+  if(e.target===document.getElementById('guestModal')) closeGuestModal();
+}
+
+function togglePlusOne() {
+  modalPlusOne=!modalPlusOne; updatePlusOneUI();
+}
+function updatePlusOneUI() {
+  document.getElementById('plusOneTrack').classList.toggle('on',modalPlusOne);
+  document.getElementById('plusOneNameRow').style.display=modalPlusOne?'block':'none';
+}
+
+function stepChild(d) {
+  modalChildren=Math.max(0,Math.min(8,modalChildren+d));
+  document.getElementById('childVal').textContent=modalChildren;
+}
+
+function saveGuestModal() {
+  const g=guests.find(x=>x.id===editGid); if(!g) return;
+  const oldPlusOne=g.plusOne; const oldChildren=g.children;
+  g.name       = document.getElementById('mName').value.trim()||g.name;
+  g.plusOne    = modalPlusOne;
+  g.plusOneName= document.getElementById('mPlusName').value.trim();
+  g.children   = modalChildren;
+  // Check if still fits in table
+  if(g.tableId){
+    const t=tables.find(x=>x.id===g.tableId);
+    if(t){
+      const newCount=gSeatCount(g);
+      const usedWithout=tblSeatsUsed(t)-gSeatCount({...g,plusOne:oldPlusOne,children:oldChildren});
+      if(usedWithout+newCount>t.seats){
+        toast(`Pažnja: sto "${t.name||'#'+t.number}" je prekoračen kapacitetom`);
+      }
+      rerender(t.id);
+    }
+  }
+  closeGuestModal();
+  renderSidebar(); updateStats(); qSave();
+  if(currentView==='guests') renderGuestView();
+  if(selTbl) refreshPanel();
+}
+
+function deleteGuestModal() {
+  if(editGid===null) return;
+  delGuest(editGid);
+  closeGuestModal();
+}
+
+// ══ VIEW 2: GUEST LIST ══════════════════════════════════
+function renderGuestView() {
+  const query=(document.getElementById('glSearch').value||'').toLowerCase();
+  let filtered=guests.filter(g=>g.name.toLowerCase().includes(query)||(g.plusOneName||'').toLowerCase().includes(query));
+
+  const total  = guests.length;
+  const assigned= guests.filter(g=>g.tableId).length;
+  const totalPeople = guests.reduce((s,g)=>s+gSeatCount(g),0);
+  const arrivedCount = guests.filter(g=>g.arrived).length;
+  document.getElementById('glSummary').textContent = isLocked
+    ? `${arrivedCount}/${total} stiglo · ${assigned}/${total} raspoređeno`
+    : `${assigned}/${total} gostiju raspoređeno · ${totalPeople} ukupno osoba (uključujući pratioce i decu)`;
+
+  const body=document.getElementById('glBody');
+
+  if(glSort==='alpha'){
+    filtered.sort((a,b)=>a.name.localeCompare(b.name,'sr'));
+    body.innerHTML=filtered.map(g=>glCard(g)).join('')
+      || '<div style="padding:24px;text-align:center;color:var(--muted);font-family:var(--font-ui);font-size:14px">Nema rezultata</div>';
+  } else {
+    // Group by table
+    const assigned = filtered.filter(g=>g.tableId);
+    const unassigned=filtered.filter(g=>!g.tableId);
+    const byTable={};
+    assigned.forEach(g=>{
+      const key=g.tableId;
+      if(!byTable[key]) byTable[key]=[];
+      byTable[key].push(g);
+    });
+    const sortedTids=Object.keys(byTable).sort((a,b)=>{
+      const ta=tables.find(x=>x.id===+a), tb=tables.find(x=>x.id===+b);
+      return (ta?.number||99)-(tb?.number||99);
+    });
+    let html='';
+    sortedTids.forEach(tid=>{
+      const t=tables.find(x=>x.id===+tid);
+      if(!t) return;
+      const used=tblSeatsUsed(t);
+      html+=`<div class="gl-group-hdr">
+        <div class="gl-group-num">${t.number||'?'}</div>
+        <div>
+          <div class="gl-group-name">${esc(t.name||('Sto '+(t.number||'')))}</div>
+          <div class="gl-group-meta">${used}/${t.seats} mesta zauzeto</div>
+        </div>
+        <div class="gl-group-line"></div>
+      </div>`;
+      html+=byTable[tid].map(g=>glCard(g,false)).join('');
+    });
+    if(unassigned.length){
+      html+=`<div class="gl-unassigned-hdr">Neraspoređeni (${unassigned.length})</div>`;
+      html+=unassigned.map(g=>glCard(g)).join('');
+    }
+    body.innerHTML=html||'<div style="padding:24px;text-align:center;color:var(--muted);font-family:var(--font-ui);font-size:14px">Nema gostiju</div>';
+  }
+
+  // attach click handlers (edit modal only in unlocked mode)
+  if(!isLocked) {
+    guests.forEach(g=>{
+      const el=document.getElementById('glc-'+g.id);
+      if(el) el.addEventListener('click',()=>openGuestModal(g.id));
+    });
+  }
+}
+
+function glCard(g, showTable=true) {
+  const t=g.tableId?tables.find(x=>x.id===g.tableId):null;
+  const init=(g.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+  const sub=[];
+  if(g.plusOne) sub.push(`+1${g.plusOneName?' ('+g.plusOneName+')':''}`);
+  if(g.children) sub.push(`${g.children} ${g.children===1?'dete':'dece'}`);
+  const arrived = g.arrived ? 'arrived' : '';
+  if(isLocked) {
+    const chk = g.arrived ? 'checked' : '';
+    const checkSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+    return `<div class="gl-card ${arrived}" id="glc-${g.id}" onclick="toggleArrived(${g.id})">
+      <div class="gl-card-avatar ${t?'ok':'unassigned'}">${init}</div>
+      <div class="gl-card-info">
+        <div class="gl-card-name">${esc(g.name)}</div>
+        ${sub.length?`<div class="gl-card-sub">${sub.map(s=>`<span>${esc(s)}</span>`).join('<span style="color:var(--border-mid)">·</span>')}</div>`:''}
+      </div>
+      ${showTable?`<div class="gl-card-tbl">
+        ${t?`<div class="gl-card-tbl-num">${t.number?'#'+t.number:''}</div>
+             <div class="gl-card-tbl-name">${esc(t.name||'Sto')}</div>`
+          :`<div style="font-size:12px;color:var(--muted);font-family:var(--font-ui)">—</div>`}
+      </div>`:''}
+      <button class="gl-check-btn ${chk}" onclick="event.stopPropagation();toggleArrived(${g.id})" title="Označi kao stigao">
+        ${checkSvg}
+      </button>
+    </div>`;
+  }
+  return `<div class="gl-card" id="glc-${g.id}">
+    <div class="gl-card-avatar ${t?'ok':'unassigned'}">${init}</div>
+    <div class="gl-card-info">
+      <div class="gl-card-name">${esc(g.name)}</div>
+      ${sub.length?`<div class="gl-card-sub">${sub.map(s=>`<span>${esc(s)}</span>`).join('<span style="color:var(--border-mid)">·</span>')}</div>`:''}
+    </div>
+    ${showTable?`<div class="gl-card-tbl">
+      ${t?`<div class="gl-card-tbl-num">${t.number?'#'+t.number:''}</div>
+           <div class="gl-card-tbl-name">${esc(t.name||'Sto')}</div>`
+        :`<div style="font-size:12px;color:var(--muted);font-family:var(--font-ui)">—</div>`}
+    </div>`:''}
+  </div>`;
+}
+
+// ══ STATS ════════════════════════════════════════════════
+function updateStats() {
+  const asgn=guests.filter(g=>g.tableId).length;
+  const tot =guests.length;
+  const seats=tables.reduce((s,t)=>s+t.seats,0);
+  const arrivedCount=guests.filter(g=>g.arrived).length;
+  document.getElementById('hdrStats').textContent = isLocked
+    ? `${arrivedCount}/${tot} stiglo · ${tables.length} stolova`
+    : `${asgn}/${tot} raspoređeno · ${tables.length} stolova · ${seats} mesta`;
+}
+
+// ══ LOCK MODE ════════════════════════════════════════════
+function toggleLock() {
+  isLocked = !isLocked;
+  const btn = document.getElementById('lockBtn');
+  if(isLocked) {
+    document.body.classList.add('locked');
+    btn.classList.remove('btn-lock');
+    btn.classList.add('btn-unlock');
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 5-5v0a5 5 0 0 1 5 5v4"/><line x1="12" y1="15" x2="12" y2="17.5"/><circle cx="12" cy="18" r=".5" fill="currentColor"/></svg> Otključaj`;
+    switchView('guests');
+    toast('Zaključano — hostesa može samo pretraživati i čekirat goste ✓');
+  } else {
+    document.body.classList.remove('locked');
+    btn.classList.remove('btn-unlock');
+    btn.classList.add('btn-lock');
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Zaključaj`;
+    toast('Otključano — edit mod aktivan');
+  }
+  updateStats();
+  if(isLocked) renderGuestView();
+  save();
+}
+
+function toggleArrived(gid) {
+  const g = guests.find(x=>x.id===gid);
+  if(!g) return;
+  g.arrived = !g.arrived;
+  updateStats();
+  if(currentView==='guests') renderGuestView();
+  save();
+}
+
+// ══ UTILS ════════════════════════════════════════════════
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+let toastT;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastT); toastT=setTimeout(()=>el.classList.remove('show'),2500);
+}
+
+// ══ KEYBOARD ════════════════════════════════════════════
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(document.getElementById('guestModal').classList.contains('open')){ closeGuestModal(); return; }
+    clearTouch(); selTbl=null; tables.forEach(t=>rerender(t.id)); closePanel();
+  }
+  if(e.key==='Delete'&&selTbl&&document.activeElement.tagName!=='INPUT'){
+    delTable(selTbl);
+  }
+});
+
+// ══ REBUILD DOM (after import) ═══════════════════════════
+function rebuildDOM(){
+  document.getElementById('roomCanvas').innerHTML='';
+  selTbl=null; closePanel(); touchSelGid=null;
+  tables.forEach(t=>renderTable(t));
+  renderSidebar(); updateStats();
+  if(currentView==='guests') renderGuestView();
+}
+
+function applyLockUI() {
+  const btn = document.getElementById('lockBtn');
+  if(isLocked) {
+    document.body.classList.add('locked');
+    btn.classList.remove('btn-lock');
+    btn.classList.add('btn-unlock');
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 5-5v0a5 5 0 0 1 5 5v4"/><line x1="12" y1="15" x2="12" y2="17.5"/><circle cx="12" cy="18" r=".5" fill="currentColor"/></svg> Otključaj`;
+  }
+}
+
+// ══ INIT ════════════════════════════════════════════════
+(function init(){
+  const fromHash=loadHash();
+  if(!fromHash) loadLocal();
+  applyLockUI();
+  if(tables.length) tables.forEach(t=>renderTable(t));
+  renderSidebar(); updateStats();
+  if(isLocked) { switchView('guests'); }
+  if(fromHash){ save(); toast('Plan učitan iz linka ✓'); }
+  else if(tables.length) toast('Plan učitan iz memorije ✓');
+})();
+</script>
+</body>
+</html>

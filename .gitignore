@@ -1,0 +1,11 @@
+# SECRETS — NEVER COMMIT
+.env
+.env.local
+*firebase-adminsdk*.json
+service_account*.json
+
+# Misc
+.DS_Store
+node_modules/
+.claude/
+.claude/
